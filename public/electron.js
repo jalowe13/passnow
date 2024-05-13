@@ -10,7 +10,8 @@ function createWindow () {
     height: 600,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    show: false // Don't show the window initially
   })
 
   // Start URL for production
@@ -23,7 +24,15 @@ function createWindow () {
   //load the index.html from a url
   win.loadURL('http://localhost:3000');
 
-  win.webContents.openDevTools()
+
+  // Show when the React app is ready
+    win.once('ready-to-show', () => {
+    win.webContents.openDevTools()
+    win.setTitle('PassNow')
+    win.show()
+  })
+
+
 }
 
 app.whenReady().then(createWindow)

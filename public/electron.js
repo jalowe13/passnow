@@ -5,9 +5,10 @@ const { app, BrowserWindow } = require('electron')
 
 function createWindow () {
   // Create the browser window.
+  const {width, height} = require('electron').screen.getPrimaryDisplay().workAreaSize
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: width,
+    height: height,
     webPreferences: {
       nodeIntegration: true
     },
@@ -29,6 +30,7 @@ function createWindow () {
     win.once('ready-to-show', () => {
     win.webContents.openDevTools()
     win.setTitle('PassNow')
+    win.maximize()
     win.show()
   })
 

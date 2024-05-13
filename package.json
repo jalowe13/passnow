@@ -17,7 +17,7 @@
   },
   "scripts": {
     "electron-start": "electron .",
-    "start": "react-scripts start",
+    "start": "set BROWSER=none&& react-scripts start",
     "start-go": "cd src/backend && go run .\\main.go serve",
     "start-frontend": "concurrently \"npm run start\" \"npm run electron-start\"",
     "startapp": "concurrently -n \"FRONTEND,BACKEND\" -c \"red,blue\" -p \"[{name}]\" \"npm run start-frontend\" \"npm run start-go\"",

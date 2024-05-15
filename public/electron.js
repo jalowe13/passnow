@@ -1,5 +1,6 @@
 const path = require('path')
 const url = require('url')
+const waitOn = require('wait-on')
 
 const { app, BrowserWindow } = require('electron')
 
@@ -22,18 +23,21 @@ function createWindow () {
     slashes: true
   });
 
-  //load the index.html from a url
-  win.loadURL('http://localhost:3000');
+  //load the index.html from a url wait for the server to be ready
+  waitOn({ resources: ['http://localhost:3000'] }, err => {
+    if (err) {
+      console.error('Error waiting for the server:', err);
+      return;
+    }
 
-
+    win.loadURL("http://localhost:3000")
   // Show when the React app is ready
     win.once('ready-to-show', () => {
-    win.webContents.openDevTools()
     win.setTitle('PassNow')
     win.maximize()
     win.show()
-  })
-
+  });
+  });
 
 }
 

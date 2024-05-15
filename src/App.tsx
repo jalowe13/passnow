@@ -1,5 +1,5 @@
 import './App.css';
-import {HomeFilled, HddFilled} from '@ant-design/icons';
+import {HomeFilled, HddFilled, KeyOutlined} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import {Button, Menu} from 'antd';
 import React from 'react';
@@ -42,17 +42,17 @@ function App() {
     {
       key: 'sub1',
       label: 'Dashboard',
-      icon: <HddFilled />,
+      icon: <HomeFilled />,
     },
     {
       key: 'sub2',
       label: 'Vault',
-      icon: <HomeFilled />,
+      icon: <HddFilled />,
     },
     {
       key: 'sub3',
       label: 'Generate Password',
-      icon: <HomeFilled />,
+      icon: <KeyOutlined />,
     }
   ];
   
@@ -61,6 +61,9 @@ function App() {
     return (
         <div>
           Dashboard
+          <div>
+            <Button onClick={handleButtonClick}> Set Database to 1 </Button>
+          </div>
         </div>
     );
   }

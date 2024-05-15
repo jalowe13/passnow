@@ -1,20 +1,31 @@
+
+const {app, BrowserWindow, screen} = require('electron')
 const path = require('path')
 const url = require('url')
 const waitOn = require('wait-on')
 
-const { app, BrowserWindow } = require('electron')
 
 function createWindow () {
-  // Create the browser window.
-  const {width, height} = require('electron').screen.getPrimaryDisplay().workAreaSize
+  // Create the browser window and listen for screen size changes
+
+  const {width, height} = screen.getPrimaryDisplay().workAreaSize
   const win = new BrowserWindow({
     width: width,
     height: height,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      zoomFactor: 1.0 // Disable zooming
     },
     show: false // Don't show the window initially
   })
+
+  // Adjust screen size per window size
+  screen.on('display-metrics-changed', () => { 
+    const {width, height} = screen.getPrimaryDisplay().workAreaSize
+    win.setSize(width, height)
+  })
+
+
 
   // Start URL for production
   const startUrl = process.env.ELECTRON_START_URL || url.format({

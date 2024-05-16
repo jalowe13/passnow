@@ -1,7 +1,7 @@
 import './App.css';
-import {HomeFilled, HddFilled, KeyOutlined} from '@ant-design/icons';
+import {HomeFilled, HddFilled, KeyOutlined, CopyOutlined} from '@ant-design/icons';
 import type { MenuProps } from 'antd';
-import {Button, Menu} from 'antd';
+import {Button, Menu, Timeline} from 'antd';
 import React from 'react';
 // Jacob Lowe
 function App() {
@@ -58,13 +58,41 @@ function App() {
   
   // Dashboard content
   function dashboardContent() {
-    return (
-        <div>
-          Dashboard
-          <div>
-            <Button onClick={handleButtonClick}> Set Database to 1 </Button>
-          </div>
+
+    const items = [{ label: 'Dice' }, {label: 'Codewars'}, {label: 'AMD'}, {label: 'Paypal'}];
+    function randomNumRange(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function recentPassItem(item: {label : string}) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white'}}>
+          <span>{item.label}</span>
+          <Button type='primary' icon={<CopyOutlined/>}></Button>
         </div>
+      );
+    } 
+
+    return (
+      <div>
+        <h1>
+          Hi!
+        </h1>
+        <div>
+          You have {randomNumRange(10,100)} passwords stored in your vault
+        </div>
+        <div>
+          <div>
+            Recently used Passwords
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <Timeline style={{ display: 'inline', color: 'black', marginTop: '20px' }}>
+                {items.map(item => recentPassItem(item))}
+              </Timeline>
+            </div>
+          </div>
+          <Button onClick={handleButtonClick}> Set Database to 1 </Button>
+        </div>
+      </div>
     );
   }
 
@@ -82,7 +110,6 @@ function App() {
   return (
     <div className="App">    
     <Menu
-    style={{ width: 200 }}
     defaultSelectedKeys={['sub1']}
     defaultOpenKeys={['sub1']}
     mode="vertical"
@@ -100,7 +127,6 @@ function App() {
       {
         isGeneratePassword && GeneratePasswordContent()
       }
-        <Button onClick={handleButtonClick}> Click me </Button>
         </header>
     </div>
   );

@@ -43,6 +43,15 @@ function createWindow () {
 
     win.loadURL("http://localhost:3000")
   // Show when the React app is ready
+
+  // Disable Scrollbar
+    win.webContents.on('did-finish-load', () => {
+    win.webContents.insertCSS(`
+      body {
+        overflow: hidden;
+      }
+    `);
+  });
     win.once('ready-to-show', () => {
     win.setTitle('PassNow')
     win.maximize()

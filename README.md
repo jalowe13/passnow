@@ -15,3 +15,7 @@ PocketBase uses SQLite
 React Native
 
 ### Build and Run
+
+To run
+
+> npm run startappnode

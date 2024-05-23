@@ -20,11 +20,15 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
-func buttonClickedHandler(w http.ResponseWriter, r *http.Request) {
-	corsMiddleware(w, r);
-	fmt.Println("Button clicked!")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("Button clicked!"))
+func buttonClickedHandler(db *pocketbase.PocketBase) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        corsMiddleware(w, r)
+        fmt.Println("Button clicked!")
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("Button clicked!"))
+
+		// TODO - Add code to save a test password to the database
+    }
 }
 
 func main() {
@@ -48,9 +52,9 @@ func main() {
 	time.Sleep(time.Second * 5) // Wait for 5 seconds to allow Pocketbase to start
 	fmt.Println("Pocketbase started!!!!!!!!!!!!!!!!!!!")
 
-	// Create a new collection, must go into a function
+	// Create a new passwords collection, must go into a function
 	collection := &models.Collection{
-		Name:       "Rubys iaejwfaioj",
+		Name:       "Passwords",
 		Type:       models.CollectionTypeBase,
 		ListRule:   nil,
 		ViewRule:   types.Pointer("@request.auth.id != ''"),
@@ -59,24 +63,34 @@ func main() {
 		DeleteRule: nil,
 		Schema:     schema.NewSchema(
 			&schema.SchemaField{
-				Name:     "name",
+				Name:     "userID",
+				Type:     schema.FieldTypeText,
+				Required: true,
+			},
+			&schema.SchemaField{
+				Name:     "website",
+				Type:     schema.FieldTypeText,
+				Required: true,
+			},
+			&schema.SchemaField{
+				Name:     "username",
 				Type:     schema.FieldTypeText,
 				Required: true,
 				Options:  &schema.TextOptions{
-					Max: types.Pointer(10),
+					Max: types.Pointer(50), // Username max length
 				},
 			},
 			&schema.SchemaField{
 				Name:     "password",
 				Type:     schema.FieldTypeText,
-				Required: true,
+				Required: true,            
 				Options:  &schema.TextOptions{
-					Max: types.Pointer(20), // Password max length
+					Max: types.Pointer(50), // Password max length
 				},
 			},
 		),
 		Indexes: types.JsonArray[string]{
-			"CREATE UNIQUE INDEX idx_name ON example (name)",
+			"CREATE UNIQUE INDEX idx_userID_website ON Passwords (userID, website)",
 		},
 	}
 	
@@ -86,7 +100,7 @@ func main() {
 
 
 	log.Println("Record saved successfully!")
-	http.HandleFunc("/api/button-clicked", buttonClickedHandler)
+	http.HandleFunc("/api/button-clicked", buttonClickedHandler(db))
 	http.ListenAndServe("localhost:8080", nil)
 
 }

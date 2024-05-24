@@ -20,6 +20,16 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
+func buttonClickedSave(db *pocketbase.PocketBase) http.HandlerFunc {
+    return func(w http.ResponseWriter, r *http.Request) {
+        corsMiddleware(w, r)
+        fmt.Println("I have to save!")
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte("I have to save!"))
+    }
+}
+
+
 func buttonClickedHandler(db *pocketbase.PocketBase) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
         corsMiddleware(w, r)
@@ -101,6 +111,8 @@ func main() {
 
 	log.Println("Record saved successfully!")
 	http.HandleFunc("/api/button-clicked", buttonClickedHandler(db))
+	http.HandleFunc("/api/save" ,buttonClickedSave(db))
+	http.HandleFunc("/api/set" ,buttonClickedHandler(db))
 	http.ListenAndServe("localhost:8080", nil)
 
 }

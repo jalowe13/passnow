@@ -31,9 +31,13 @@ function App() {
     }
   }
 
-  
-  const handleButtonClick = () => {
-    fetch('http://127.0.0.1:8080/api/button-clicked', { method: 'POST' });
+  /*
+    Generic function to handle button clicks and send a POST request to the server based on
+    the endpoint passed in as a string parameter.
+  */
+  const handleButtonClick = (endpoint: string) => {
+    console.log('Button clicked with string', endpoint);
+    fetch(`http://127.0.0.1:8080/api/${endpoint}`, { method: 'POST' });
   };
 
   type MenuItem = Required<MenuProps>['items'][number];
@@ -90,7 +94,9 @@ function App() {
               </Timeline>
             </div>
           </div>
-          <Button onClick={handleButtonClick}> Set Database to 1 </Button>
+          <Button onClick={() => handleButtonClick('button-clicked')}> Set Database to 1 </Button>
+          <Button onClick={() => handleButtonClick('save')}> Save API Test </Button>
+          <Button onClick={() => handleButtonClick('set')}>Set API Test </Button>
         </div>
       </div>
     );

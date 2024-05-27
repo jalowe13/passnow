@@ -1,32 +1,32 @@
 import './App.css';
 import {HomeFilled, HddFilled, KeyOutlined, CopyOutlined} from '@ant-design/icons';
-import type { MenuProps } from 'antd';
-import {Button, Menu, Timeline} from 'antd';
-import React from 'react';
+
+import {Button, Menu, MenuProps, Timeline} from 'antd';
+import React, { useState } from 'react';
 // Jacob Lowe
-function App() {
-  const [isDashboard, setIsDashboard] = React.useState(true);
-  const [isVault, setIsVault] = React.useState(false);
-  const [isGeneratePassword, setIsGeneratePassword] = React.useState(false);
+
+// Viewing Screens
+enum View {
+  Dashboard,
+  Vault,
+  GeneratePassword,
+}
+
+const App: React.FC = () =>{
+  const [view, setView] = useState<View>(View.Dashboard); // ['dashboard', 'vault', 'generate-password'
 
 
-  const handleClickMenu = (e) => {
+  const handleClickMenu: MenuProps['onClick'] = (e) => {
     console.log(e.key)
     switch(e.key) {
       case 'sub1':
-        setIsDashboard(true);
-        setIsVault(false);
-        setIsGeneratePassword(false);
+        setView(View.Dashboard);
         break;
       case 'sub2':
-        setIsDashboard(false);
-        setIsVault(true);
-        setIsGeneratePassword(false);
+        setView(View.Vault);
         break;
       case 'sub3':
-        setIsDashboard(false);
-        setIsVault(false);
-        setIsGeneratePassword(true);
+        setView(View.GeneratePassword);
         break;
     }
   }
@@ -35,7 +35,7 @@ function App() {
     Generic function to handle button clicks and send a POST request to the server based on
     the endpoint passed in as a string parameter.
   */
-  const handleButtonClick = (endpoint: string) => {
+  const handleButtonClick = (endpoint: string): void => {
     console.log('Button clicked with string', endpoint);
     fetch(`http://127.0.0.1:8080/api/${endpoint}`, { method: 'POST' });
   };
@@ -64,11 +64,11 @@ function App() {
   function dashboardContent() {
 
     const items = [{ label: 'Dice' }, {label: 'Codewars'}, {label: 'AMD'}, {label: 'Paypal'}];
-    function randomNumRange(min, max) {
+    function randomNumRange(min : number, max: number) : number {
       return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    function recentPassItem(item: {label : string}) {
+    function recentPassItem(item: {label : string}): JSX.Element {
       return (
         <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white'}}>
           <span>{item.label}</span>
@@ -125,13 +125,13 @@ function App() {
     />
     <header className="App-header">
       {
-        isDashboard && dashboardContent() 
+        view === View.Dashboard && dashboardContent() 
       }
       {
-        isVault && VaultContent()
+        view === View.Vault && VaultContent()
       }
       {
-        isGeneratePassword && GeneratePasswordContent()
+       view === View.GeneratePassword && GeneratePasswordContent()
       }
         </header>
     </div>

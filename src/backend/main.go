@@ -1,4 +1,7 @@
 package main
+// main.go
+// Jacob Lowe
+// Passnow backend server
 
 import (
 	"fmt"
@@ -6,6 +9,7 @@ import (
 	"os"
 	"time"
 	"net/http"
+	// "encoding/json"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/models"
@@ -13,32 +17,56 @@ import (
     "github.com/pocketbase/pocketbase/tools/types"
 	"github.com/pocketbase/pocketbase/core"
 )
-
+/*
+// Cross Origin Resource Sharing (CORS) middleware
+	Information can be requested from another domain
+*/
 func corsMiddleware(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 }
 
+// Default handler with response message
+func handleRequest(w http.ResponseWriter, r *http.Request, m string){
+    corsMiddleware(w, r)
+    if r.Method != http.MethodOptions {
+        fmt.Println(m)
+        w.WriteHeader(http.StatusOK)
+        w.Write([]byte(m))		
+    }
+} 
+
+// Button click handlers
+
 func buttonClickedSave(db *pocketbase.PocketBase) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        corsMiddleware(w, r)
-        fmt.Println("I have to save!")
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("I have to save!"))
+        handleRequest(w, r, "Save password!")
     }
 }
 
 
 func buttonClickedHandler(db *pocketbase.PocketBase) http.HandlerFunc {
     return func(w http.ResponseWriter, r *http.Request) {
-        corsMiddleware(w, r)
-        fmt.Println("Button clicked!")
-        w.WriteHeader(http.StatusOK)
-        w.Write([]byte("Button clicked!"))
-
+        handleRequest(w, r, "Button clicked!")
 		// TODO - Add code to save a test password to the database
     }
+}
+
+func buttonClickedGenerate(db *pocketbase.PocketBase) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// var data struct {
+		// 	PasswordLength int `json:"passwordLength"`
+		// }
+		// // Parse the request body
+		// err := json.NewDecoder(r.Body).Decode(&data)
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusBadRequest)
+		// 	return
+		// }
+		// Generate a password
+		handleRequest(w, r, GenPass(16))
+	}
 }
 
 func main() {
@@ -113,6 +141,7 @@ func main() {
 	http.HandleFunc("/api/button-clicked", buttonClickedHandler(db))
 	http.HandleFunc("/api/save" ,buttonClickedSave(db))
 	http.HandleFunc("/api/set" ,buttonClickedHandler(db))
+	http.HandleFunc("/api/generate-password" ,buttonClickedGenerate(db))
 	http.ListenAndServe("localhost:8080", nil)
 
 }

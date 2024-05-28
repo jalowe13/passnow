@@ -5,11 +5,13 @@ import React, { useState } from "react";
 import { InputNumber, Button } from "antd";
 
 interface GeneratePasswordProps {
-  handleButtonClick: (endpoint: string) => void;
+  handleButtonClick: (endpoint: string, data: string | number | null) => void;
   items: { label: string }[];
 }
 
-const GeneratePassword: React.FC<GeneratePasswordProps> = () => {
+const GeneratePassword: React.FC<GeneratePasswordProps> = ({
+  handleButtonClick,
+}) => {
   const [value, setValue] = useState<string | number | null>("99"); // Default value for the input number
   return (
     <div>
@@ -31,6 +33,16 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = () => {
         >
           Reset
         </Button>
+        <div>
+          <Button
+            type="primary"
+            onClick={() => {
+              handleButtonClick("generate-password", value);
+            }}
+          >
+            Test
+          </Button>
+        </div>
       </div>
     </div>
   );

@@ -36,10 +36,25 @@ const App: React.FC = () => {
   /*
     Generic function to handle button clicks and send a POST request to the server based on
     the endpoint passed in as a string parameter.
+    // endpoint: string - the endpoint to send the POST request to
+    // data: any - optional data to send to the server
   */
-  const handleButtonClick = (endpoint: string): void => {
+  const handleButtonClick = (endpoint: string, data?: any): void => {
     console.log("Button clicked with string", endpoint);
-    fetch(`http://127.0.0.1:8080/api/${endpoint}`, { method: "POST" });
+    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: data ? JSON.stringify(data) : null,
+    })
+      .then((response) => response.json()) // Convert the response data to JSON
+      .then((data) => {
+        console.log("Response:", data); // Log the response data
+      })
+      .catch((error) => {
+        console.error("Error:", error); // Log any errors
+      });
   };
 
   type MenuItem = Required<MenuProps>["items"][number];

@@ -7,7 +7,7 @@ const chalk = require('chalk');
 const electron = spawn('npm', ['run', 'electron-start'], { shell: true });
 const frontend = spawn('npm', ['run', 'start'], { shell: true });
 const backend = spawn('npm', ['run', 'start-go'], { shell: true });
-const processToKill = 'main.exe';
+const processToKill = 'server.exe';
 
 electron.stdout.on('data', (data) => {
   console.log(chalk.yellow(`[Electron]: ${data}`));

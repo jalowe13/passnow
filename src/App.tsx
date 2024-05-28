@@ -17,6 +17,7 @@ enum View {
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>(View.Dashboard); // ['dashboard', 'vault', 'generate-password'
+  const [responseData, setResponseData] = useState<string>(""); // Response data from the server
 
   const handleClickMenu: MenuProps["onClick"] = (e) => {
     console.log(e.key);
@@ -40,7 +41,13 @@ const App: React.FC = () => {
     // data: any - optional data to send to the server
   */
   const handleButtonClick = (endpoint: string, data?: any): void => {
+    console.log("Data coming in", data);
     console.log("Button clicked with string", endpoint);
+    console.log("Data:", data);
+    console.log("JSON payload:", JSON.stringify(data));
+    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
+      // ...
+    });
     fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
       method: "POST",
       headers: {
@@ -48,9 +55,11 @@ const App: React.FC = () => {
       },
       body: data ? JSON.stringify(data) : null,
     })
-      .then((response) => response.json()) // Convert the response data to JSON
+      .then((response) => response.text())
       .then((data) => {
+        console.log("Endpoint:", endpoint); // Log the endpoint
         console.log("Response:", data); // Log the response data
+        setResponseData(data); // Set the response data in the state
       })
       .catch((error) => {
         console.error("Error:", error); // Log any errors
@@ -110,6 +119,7 @@ const App: React.FC = () => {
           <GeneratePassword
             handleButtonClick={handleButtonClick}
             items={dashboard_items}
+            responseData={responseData}
           />
         )}
       </header>

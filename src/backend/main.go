@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 	"net/http"
-	// "encoding/json"
+	"encoding/json"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/models"
@@ -25,6 +25,10 @@ func corsMiddleware(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	if r.Method == "OPTIONS" {
+        w.WriteHeader(http.StatusOK)
+        return
+    }
 }
 
 // Default handler with response message
@@ -55,17 +59,18 @@ func buttonClickedHandler(db *pocketbase.PocketBase) http.HandlerFunc {
 
 func buttonClickedGenerate(db *pocketbase.PocketBase) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// var data struct {
-		// 	PasswordLength int `json:"passwordLength"`
-		// }
-		// // Parse the request body
-		// err := json.NewDecoder(r.Body).Decode(&data)
-		// if err != nil {
-		// 	http.Error(w, err.Error(), http.StatusBadRequest)
-		// 	return
-		// }
+		corsMiddleware(w, r)
+		var data struct {
+			PasswordLength int `json:"passwordLength"`
+		}
+		// Parse the request body
+		err := json.NewDecoder(r.Body).Decode(&data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 		// Generate a password
-		handleRequest(w, r, GenPass(16))
+		handleRequest(w, r, GenPass(data.PasswordLength))
 	}
 }
 

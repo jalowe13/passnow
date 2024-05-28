@@ -6,13 +6,17 @@ package main
 
 import (
 	"fmt"
-
+	"math/rand"
+	"time"
 )
-
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 func GenPass(passwordLength int) string {
-	// Generate a password
-	fmt.Println("Generating password...")
-	// Generate a random password
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	return "testpassword"
+    fmt.Println("Generating password...")
+	fmt.Println("Password length: ", passwordLength)
+    rand.Seed(time.Now().UnixNano())
+    password := make([]byte, passwordLength) // Use passwordLength instead of length
+    for i := range password {
+        password[i] = charset[rand.Intn(len(charset))]
+    }
+    return string(password)
 }

@@ -62,6 +62,7 @@ func buttonClickedGenerate(db *pocketbase.PocketBase) http.HandlerFunc {
 		corsMiddleware(w, r)
 		var data struct {
 			PasswordLength int `json:"passwordLength"`
+			CharToggle bool `json:"charToggle"`
 		}
 		// Parse the request body
 		err := json.NewDecoder(r.Body).Decode(&data)
@@ -70,7 +71,7 @@ func buttonClickedGenerate(db *pocketbase.PocketBase) http.HandlerFunc {
 			return
 		}
 		// Generate a password
-		handleRequest(w, r, GenPass(data.PasswordLength))
+		handleRequest(w, r, GenPass(data.PasswordLength, data.CharToggle))
 	}
 }
 

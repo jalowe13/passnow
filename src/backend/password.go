@@ -9,8 +9,13 @@ import (
 	"math/rand"
 	"time"
 )
-const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-func GenPass(passwordLength int) string {
+
+const symbolset = "!;#$%&'()*+,-./:;<=>?@[]^_`{|}~"
+func GenPass(passwordLength int, charinc bool) string {
+    charset := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    if charinc == true {
+        charset += symbolset
+    }
     fmt.Println("Generating password...")
 	fmt.Println("Password length: ", passwordLength)
     rand.Seed(time.Now().UnixNano())

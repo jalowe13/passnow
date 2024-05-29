@@ -4,10 +4,11 @@
 const { exec, spawn } = require('child_process');
 const chalk = require('chalk');  
 
+//const uvicorn = spawn('npm', ['run', 'start-uvicorn'], { shell: true, detached: true});
+const dynamo = spawn('npm', ['run', 'start-dynamo'], { shell: true });
 const electron = spawn('npm', ['run', 'electron-start'], { shell: true });
 const frontend = spawn('npm', ['run', 'start'], { shell: true });
-const backend = spawn('npm', ['run', 'start-go'], { shell: true });
-const processToKill = 'server.exe';
+//const backend = spawn('npm', ['run', 'start-go'], { shell: true });
 
 electron.stdout.on('data', (data) => {
   console.log(chalk.yellow(`[Electron]: ${data}`));
@@ -17,9 +18,21 @@ frontend.stdout.on('data', (data) => {
   console.log(chalk.blue(`[Frontend]: ${data}`));
 });
 
-backend.stdout.on('data', (data) => {
-  console.log(chalk.green(`[Backend]: ${data}`));
+dynamo.stdout.on('data', (data) => {
+  console.log(chalk.green(`[DynamoGB]: ${data}`));
 });
+
+// uvicorn.stdout.on('data', (data) => {
+//   console.log(chalk.greenBright(`[Uvicorn]: ${data}`));
+// }); 
+// uvicorn.on('error', (error) => {
+//   console.error(`Error starting uvicorn: ${error.message}`);
+// });
+
+
+// backend.stdout.on('data', (data) => {
+//   console.log(chalk.green(`[Backend]: ${data}`));
+// });
 
 electron.on('close', () => {
     console.log('Electron process closed');
@@ -35,11 +48,11 @@ function closeProcesses() {
         }
     });
 
-    exec(`taskkill /PID ${backend.pid} /F`, (error) => {
-        if (error) {
-            console.error(`Failed to kill backend: ${error}`);
-        }
-    });
+    // exec(`taskkill /PID ${backend.pid} /F`, (error) => {
+    //     if (error) {
+    //         console.error(`Failed to kill backend: ${error}`);
+    //     }
+    // });
 
     exec(`taskkill /IM ${processToKill} /F`, (error) => {
         if (error) {

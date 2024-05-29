@@ -18,7 +18,9 @@
   },
   "scripts": {
     "electron-start": "electron .",
-    "start": "set BROWSER=none&& react-scripts start",
+    "start": "set BROWSER=none&& set PORT=3000 && react-scripts start",
+    "start-dynamo": "docker run -p 8001:8000 amazon/dynamodb-local",
+    "start-uvicorn": "cd src/backend && python -m uvicorn server:app --reload",
     "start-go": "cd src/backend && go run . serve",
     "start-frontend": "concurrently \"npm run start\" \"npm run electron-start\"",
     "startapp": "concurrently -n \"FRONTEND,BACKEND\" -c \"red,blue\" -p \"[{name}]\" \"npm run start-frontend\" \"npm run start-go\"",

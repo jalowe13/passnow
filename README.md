@@ -20,8 +20,8 @@ pip install uvicorn
 docker pull amazon/dynamodb-local
 
 # Running
-python -m uvicorn server:app --reload
-docker run -p 8000:8000 amazon/dynamodb-local
+npm run startappnode
+npm run start-uvicorn
 ```
 
 ### Mobile Implementation

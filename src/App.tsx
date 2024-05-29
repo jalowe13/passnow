@@ -45,25 +45,12 @@ const App: React.FC = () => {
     console.log("Button clicked with string", endpoint);
     console.log("Data:", data);
     console.log("JSON payload:", JSON.stringify(data));
-    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
-      // ...
-    });
-    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
-      method: "POST",
+    fetch(`http://127.0.0.1:8000/api/${endpoint}`, {
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      body: data ? JSON.stringify(data) : null,
-    })
-      .then((response) => response.text())
-      .then((data) => {
-        console.log("Endpoint:", endpoint); // Log the endpoint
-        console.log("Response:", data); // Log the response data
-        setResponseData(data); // Set the response data in the state
-      })
-      .catch((error) => {
-        console.error("Error:", error); // Log any errors
-      });
+    });
   };
 
   type MenuItem = Required<MenuProps>["items"][number];

@@ -24,3 +24,4 @@ yarn-debug.log*
 yarn-error.log*
 /src/backend/pb_data
 src/backend/server.exe
+/src/backend/__pycache__

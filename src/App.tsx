@@ -44,17 +44,10 @@ const App: React.FC = () => {
     console.log("Data coming in", data);
     console.log("Button clicked with string", endpoint);
     console.log("Data:", data);
-    console.log("JSON payload:", JSON.stringify(data));
-    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
-      // ...
-    });
-    fetch(`http://127.0.0.1:8080/api/${endpoint}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: data ? JSON.stringify(data) : null,
-    })
+    // Convert data to query parameters for GET request
+    const params = new URLSearchParams(data).toString();
+    console.log("Params:", params, { method: "GET" });
+    fetch(`http://127.0.0.1:8080/api/${endpoint}?${params}`)
       .then((response) => response.text())
       .then((data) => {
         console.log("Endpoint:", endpoint); // Log the endpoint

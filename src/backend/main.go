@@ -9,7 +9,7 @@ import (
 	"os"
 	"time"
 	"net/http"
-	"encoding/json"
+	"strconv"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/models"
@@ -60,16 +60,26 @@ func buttonClickedHandler(db *pocketbase.PocketBase) http.HandlerFunc {
 func buttonClickedGenerate(db *pocketbase.PocketBase) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		corsMiddleware(w, r)
-		var data struct {
-			PasswordLength int `json:"passwordLength"`
-			CharToggle bool `json:"charToggle"`
-		}
-		// Parse the request body
-		err := json.NewDecoder(r.Body).Decode(&data)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
+        var data struct {
+            PasswordLength int
+            CharToggle     bool
+        }
+
+        // Parse the query parameters
+        params := r.URL.Query()
+        passwordLength, err := strconv.Atoi(params.Get("passwordLength"))
+        if err != nil {
+            http.Error(w, "Invalid password length", http.StatusBadRequest)
+            return
+        }
+        data.PasswordLength = passwordLength
+
+        charToggle, err := strconv.ParseBool(params.Get("charToggle"))
+        if err != nil {
+            http.Error(w, "Invalid char toggle value", http.StatusBadRequest)
+            return
+        }
+        data.CharToggle = charToggle
 		// Generate a password
 		handleRequest(w, r, GenPass(data.PasswordLength, data.CharToggle))
 	}

@@ -19,8 +19,10 @@ pip install fastapi
 pip install uvicorn
 docker pull amazon/dynamodb-local
 
-# Running
-npm run startappnode
+# Running in GO
+npm run startappgo
+# Running in Python (Experimental)
+npm run startapp
 npm run start-uvicorn
 ```
 

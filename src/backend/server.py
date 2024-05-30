@@ -1,6 +1,7 @@
 import os
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
+from typing import Optional
 
 
 app = FastAPI()
@@ -24,12 +25,12 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World!!!"}
+    return {"message": "Hello World!"}
 
-@app.get("/api/button-clicked")
-async def button_clicked_handler():
+@app.get("/api/{endpoint}")
+async def button_clicked_handler(passwordLength: Optional[int] = None, charToggle: Optional[bool] = None):
     print("Button was clicked right now!")
-    return {"message": "Button was clicked right now!"}
+    return {"message": f" Button was called with passwordLength={passwordLength} and charToggle={charToggle}"}
 
 @app.get("/api/set")
 async def set_handler():

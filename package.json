@@ -18,7 +18,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "electron-start": "electron .",
+    "electron-start": "set FORCE_COLOR=1 && electron .",
     "start": "set BROWSER=none&& set PORT=3000 && react-scripts start",
     "start-dynamo": "docker run -p 8001:8000 amazon/dynamodb-local",
     "start-uvicorn": "cd src/backend && python -m uvicorn server:app --port 8080 --reload",

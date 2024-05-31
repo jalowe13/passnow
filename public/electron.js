@@ -7,19 +7,21 @@ const waitOn = require("wait-on");
 const chalk = require("chalk");
 
 // Declare variables for the backend and frontend processes
-let frontend, backend, dynamo;
+let frontend, backend, dynamo, uvicorn;
 // PID of last node.js process instance when application starts
 let lastChildPid;
 
 function createWindow() {
   // Create the browser window and listen for screen size changes
   console.log("Creating window...");
+  process.env.FORCE_COLOR = 1; // Force chalk colors
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
   const win = new BrowserWindow({
     width: width,
     height: height,
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
       zoomFactor: 1.0, // Disable zooming
     },
     show: false, // Don't show the window initially
@@ -55,12 +57,12 @@ function createWindow() {
     });
   }
 
-  frontend = spawn("npm", ["run", "start"], { shell: true });
+  frontend = spawn("npm", ["run", "start"], { shell: true, env: process.env });
 
   console.log(`Started Node.js process with PID: ${frontend.pid}`);
 
   frontend.stdout.on("data", (data) => {
-    console.log(chalk.blue(`[Frontend]: ${data}`));
+    console.log(chalk.blue(`[Frontend]: ${data.toString()}`));
   });
 
   console.log("App started!");

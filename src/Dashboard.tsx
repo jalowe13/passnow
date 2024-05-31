@@ -7,7 +7,7 @@ import { CopyOutlined } from "@ant-design/icons";
 //type MenuItem = Required<MenuProps>['items'][number];
 
 interface DashboardProps {
-  handleButtonClick: (endpoint: string) => void;
+  handleButtonClick: (endpoint: string, data?: any) => void;
   items: { label: string }[];
 }
 
@@ -16,6 +16,11 @@ const Dashboard: React.FC<DashboardProps> = ({ handleButtonClick, items }) => {
   function randomNumRange(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+
+  /*
+    Returns specific JSX for each item in the 'items' array
+    This is useful for the recent passwords display section
+  */
   function recentPassItem(item: { label: string }): JSX.Element {
     return (
       <div
@@ -24,6 +29,9 @@ const Dashboard: React.FC<DashboardProps> = ({ handleButtonClick, items }) => {
           justifyContent: "space-between",
           color: "white",
         }}
+        onClick={() =>
+          handleButtonClick("copy-password", { passwordName: item.label })
+        }
       >
         <span>{item.label}</span>
         <Button type="primary" icon={<CopyOutlined />}></Button>

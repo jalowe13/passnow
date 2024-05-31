@@ -16,6 +16,8 @@ enum View {
 }
 
 const App: React.FC = () => {
+  // Log messages
+
   const [view, setView] = useState<View>(View.Dashboard); // ['dashboard', 'vault', 'generate-password'
   const [responseData, setResponseData] = useState<string>(""); // Response data from the server
 

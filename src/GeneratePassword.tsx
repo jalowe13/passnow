@@ -3,24 +3,50 @@
 
 import React, { useState } from "react";
 import { InputNumber, Button, Switch } from "antd";
+import { API, ENDPOINTS } from "./Api.ts";
 
 interface GeneratePasswordProps {
-  handleButtonClick: (
-    endpoint: string,
-    data: { passwordLength?: string | number | null; charToggle?: boolean }
-  ) => void;
+  // handleButtonClick: (
+  //   endpoint: string,
+  //   data: { passwordLength?: string | number | null; charToggle?: boolean }
+  // ) => void;
   items: { label: string }[];
-  responseData: string;
+  //responseData: string;
 }
 
-const GeneratePassword: React.FC<GeneratePasswordProps> = ({
-  handleButtonClick,
-  responseData,
-}) => {
+// Returning data from the server
+interface Data {
+  password: string;
+}
+const defaultData: Data = {
+  password: "",
+};
+
+const GeneratePassword: React.FC<GeneratePasswordProps> = (
+  {
+    // handleButtonClick,
+    //responseData,
+  }
+) => {
+  const [data, setData] = useState<Data>(defaultData); // Data from the server
   const [value, setValue] = useState<string | number | null>("16"); // Default value for the input number
   const [charToggle, setCharToggle] = useState<boolean>(false); // Default value for the toggle button
   const onCharToggleClick = (checked: boolean) => {
     setCharToggle(checked); // Set the toggle button to the opposite of what it currently is
+  };
+
+  const handleButtonClick = async (): Promise<void> => {
+    const passwordLength =
+      typeof value === "string" ? parseInt(value, 10) : value;
+    try {
+      const result = await API.fetch(ENDPOINTS.GENERATE_PASSWORD, {
+        passwordLength,
+        charToggle,
+      });
+      setData(result);
+    } catch (error) {
+      console.error(`Failed to fetch data`, error);
+    }
   };
 
   return (
@@ -52,19 +78,14 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = ({
           <Button
             type="primary"
             onClick={() => {
-              const passwordLength =
-                typeof value === "string" ? parseInt(value, 10) : value;
-              handleButtonClick("generate-password", {
-                passwordLength,
-                charToggle: charToggle,
-              });
+              handleButtonClick();
             }}
           >
             Generate Password
           </Button>
           <div>
             <h2>Password</h2>
-            <div>{responseData}</div>
+            <div>{data.password}</div>
           </div>
         </div>
       </div>

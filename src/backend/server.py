@@ -1,4 +1,6 @@
 import os
+import threading
+import logging
 from fastapi import FastAPI, Response, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -11,6 +13,28 @@ app = FastAPI()
 # def for requests and sqlite3
 # async def for httpx and aiohttp
 
+# Caching the password with key value store
+class KeyValueStore:
+    def __init__(self):
+        self.store = {}
+        self.lock = threading.Lock()
+
+    def set(self, key, values):
+        with self.lock:
+            logging.info(f"Setting value for {key}: {values}")
+            self.store[key] = list(values)
+
+    def fetch(self, key):
+        with self.lock:
+            logging.info(f"~~~~~~~~~~~~~~~~~~~~~~~~Fetching value for {key}")
+            value = self.store.get(key)
+            logging.info(f"~~~~~~~~~~~~~~~~~~~~~~~~Value: {value}")
+            return value
+    def keys(self):
+        with self.lock:
+            logging.info(f"Fetching keys")
+            logging.info(f"Keys: {list(self.store.keys())}")
+            return list(self.store.keys())
 
 # Setting up CORS middleware for information being able to be
 # accessed from the frontend
@@ -34,56 +58,17 @@ def gen_pass(password_length, char_inc):
     password = ''.join(random.choice(charset) for _ in range(password_length))
     return password
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World!"}
+# REST API for generating password
+@app.get("/api/v1/health")
+async def health():
+    return {"message": "Hello from the server!"}
 
-@app.get("/api/button-clicked")
-async def button_clicked_handler():
+@app.get("/api/v1/button-clicked")
+async def button_clicked():
     return {"message": "Button clicked!"}
 
-@app.get("/api/copy-password")
-async def copy_password_handler(passwordName: str):
-    """
-    Copy a password to the clipboard from the database
-    based on the password name provided
-
-    Args:
-    passwordName (str): The name of the password to copy
-
-    Returns:
-    Response: The message indicating that the password is copied
-    """
-    if (passwordName is None):
-        raise HTTPException(status_code=400, detail="Password name not provided")
-    return {"message": "Copy password endpoint is called {passwordName}"} 
-
-@app.get("/api/save")
-async def save_handler():
-    return {"message": "Save endpoint"}
-
-@app.get("/api/generate-password")
-async def button_clicked_handler(passwordLength: Optional[int] = None, charToggle: Optional[bool] = None):
-    """
-    Generate a password based on the length and character toggle provided
-
-    Args:
-    passwordLength (int): The length of the password to generate
-    charToggle (bool): Whether to include special characters in the password
-
-    Returns:
-    Response: The generated password
-    """
-    if (passwordLength is None):
-        raise HTTPException(status_code=400, detail="Password length not provided")
-    if (charToggle is None):
-        raise HTTPException(status_code=400, detail="Character toggle not provided")
-    password = gen_pass(passwordLength, charToggle) # Generate password
-    print("Generated password: ", password)
-    return Response(content=password, media_type="text/plain")
-
-@app.get("/api/set")
-async def set_handler():
-    return {"message": "Set endpoint"}
-
+@app.get("/api/v1/password/generate/{password_length}/{char_inc}")
+async def generate_password(password_length: int, char_inc: bool):
+    password = gen_pass(password_length, char_inc)
+    return {"password": password}
 

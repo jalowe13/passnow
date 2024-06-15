@@ -1,21 +1,27 @@
 // Dashboard.tsx
 // Jacob Lowe
-import React from "react";
+import React, { useState } from "react";
+import { API, ENDPOINTS } from "./Api.ts";
 import { Button, Timeline } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 
 //type MenuItem = Required<MenuProps>['items'][number];
 
 interface DashboardProps {
-  handleButtonClick: (endpoint: string, data?: any) => void;
   items: { label: string }[];
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ handleButtonClick, items }) => {
+const Dashboard: React.FC<DashboardProps> = ({ items }) => {
   // ...
+  const [data, setData] = useState<any>(null); // Data from the server
+
   function randomNumRange(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
+  const handleButtonClick = (endpoint: string, data?: any): void => {
+    console.log("Call the API with the endpoint: ", endpoint);
+    API.fetch(endpoint);
+  };
 
   /*
     Returns specific JSX for each item in the 'items' array
@@ -29,9 +35,7 @@ const Dashboard: React.FC<DashboardProps> = ({ handleButtonClick, items }) => {
           justifyContent: "space-between",
           color: "white",
         }}
-        onClick={() =>
-          handleButtonClick("copy-password", { passwordName: item.label })
-        }
+        onClick={() => handleButtonClick(ENDPOINTS.HEALTH)}
       >
         <span>{item.label}</span>
         <Button type="primary" icon={<CopyOutlined />}></Button>
@@ -56,15 +60,16 @@ const Dashboard: React.FC<DashboardProps> = ({ handleButtonClick, items }) => {
             </Timeline>
           </div>
         </div>
-        <Button onClick={() => handleButtonClick("button-clicked")}>
-          {" "}
+        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
           Set Database to 1{" "}
         </Button>
-        <Button onClick={() => handleButtonClick("save")}>
+        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
           {" "}
           Save API Test{" "}
         </Button>
-        <Button onClick={() => handleButtonClick("set")}>Set API Test </Button>
+        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
+          Set API Test{" "}
+        </Button>
       </div>
     </div>
   );

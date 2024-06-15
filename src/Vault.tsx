@@ -4,7 +4,6 @@
 import React from "react";
 
 interface VaultProps {
-  handleButtonClick: (endpoint: string) => void;
   items: { label: string }[];
 }
 

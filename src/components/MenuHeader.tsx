@@ -65,10 +65,11 @@ const MenuHeader: React.FC = () => {
     },
   ];
 
+  // Default selected Menu Key
   return (
     <div className="App">
       <Menu
-        defaultSelectedKeys={["sub1"]}
+        defaultSelectedKeys={["sub3"]}
         defaultOpenKeys={["sub1"]}
         mode="horizontal"
         items={items}

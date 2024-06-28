@@ -31,7 +31,8 @@ export const useView = () => {
 };
 
 const App: React.FC = () => {
-  const [view, setView] = useState<View>(View.Dashboard);
+  // Change Default Start View
+  const [view, setView] = useState<View>(View.GeneratePassword);
 
   return (
     <ViewContext.Provider value={{ view, setView }}>

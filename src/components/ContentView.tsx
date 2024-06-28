@@ -1,7 +1,6 @@
 import React from "react";
 import { View, useView } from "../App.tsx";
 import Dashboard from "../Dashboard.tsx";
-import API from "../Api.ts";
 import Vault from "../Vault.tsx";
 import GeneratePassword from "../GeneratePassword.tsx";
 
@@ -13,22 +12,12 @@ const ContentView: React.FC = () => {
     { label: "AMD" },
     { label: "Paypal" },
   ];
-  const handleButtonClick = (endpoint: string, data?: any): void => {
-    console.log("test coming in", data);
-    API.fetch(endpoint, data);
-  };
   return (
     <div>
       <header className="App-header">
         {view === View.Dashboard && <Dashboard items={dashboard_items} />}
         {view === View.Vault && <Vault items={dashboard_items} />}
-        {view === View.GeneratePassword && (
-          <GeneratePassword
-            //handleButtonClick={handleButtonClick}
-            items={dashboard_items}
-            //responseData={responseData}
-          />
-        )}
+        {view === View.GeneratePassword && <GeneratePassword />}
       </header>
     </div>
   );

@@ -60,16 +60,6 @@ const Dashboard: React.FC<DashboardProps> = ({ items }) => {
             </Timeline>
           </div>
         </div>
-        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
-          Set Database to 1{" "}
-        </Button>
-        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
-          {" "}
-          Save API Test{" "}
-        </Button>
-        <Button onClick={() => handleButtonClick(ENDPOINTS.BUTTON_CLICKED, {})}>
-          Set API Test{" "}
-        </Button>
       </div>
     </div>
   );

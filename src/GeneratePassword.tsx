@@ -2,37 +2,45 @@
 // Jacob Lowe
 
 import React, { useState } from "react";
-import { Input, InputNumber, Button, Switch } from "antd";
+import { Input, InputNumber, Button, Switch, notification } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { API, ENDPOINTS } from "./Api.ts";
-
-interface GeneratePasswordProps {
-  // handleButtonClick: (
-  //   endpoint: string,
-  //   data: { passwordLength?: string | number | null; charToggle?: boolean }
-  // ) => void;
-  items: { label: string }[];
-  //responseData: string;
-}
+import { addPassword } from "./Vault.tsx";
 
 // Returning data from the server
-interface Data {
+export interface Data {
+  name: string;
   password: string;
 }
-const defaultData: Data = {
-  password: "",
-};
 
-const GeneratePassword: React.FC<GeneratePasswordProps> = (
-  {
-    // handleButtonClick,
-    //responseData,
-  }
-) => {
-  const [data, setData] = useState<Data>(defaultData); // Data from the server
+const GeneratePassword: React.FC = () => {
   const [value, setValue] = useState<string | number | null>("16"); // Default value for the input number
   const [nameValue, setNameValue] = useState<string>("");
   const [charToggle, setCharToggle] = useState<boolean>(false); // Default value for the toggle button
+  const [api, contextHolder] = notification.useNotification();
+
+  type NotificationType = "success" | "info" | "warning" | "error";
+
+  const openNotificationWithIcon = (type: NotificationType) => {
+    let message = "";
+    let description = "";
+    switch (type) {
+      case "success":
+        message = "Success";
+        description = "Password submitted";
+        break;
+      case "error":
+        message = "Error";
+        description = "Please provide a valid name";
+        break;
+      default:
+        throw new Error(`Unhandled notification type: ${type}`);
+    }
+    api[type]({
+      message: message,
+      description: description,
+    });
+  };
   const onCharToggleClick = (checked: boolean) => {
     setCharToggle(checked); // Set the toggle button to the opposite of what it currently is
   };
@@ -44,19 +52,24 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = (
       const result = await API.fetch(ENDPOINTS.GENERATE_PASSWORD, {
         passwordLength,
         charToggle,
-        // TODO: Name here!
+        nameValue,
       });
-      alert(result);
-      setData(result);
+      addPassword(result);
+      openNotificationWithIcon("success");
     } catch (error) {
+      if (!nameValue) {
+        console.error(`No name value`, error);
+        openNotificationWithIcon("error");
+      }
       console.error(`Failed to fetch data`, error);
     }
   };
 
   return (
     <div>
-      <h1>Generate Password</h1>
+      <>{contextHolder}</>
       <div>
+        <h1>Generate Password</h1>
         <div> Website Name </div>
         <div>
           <>
@@ -99,10 +112,6 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = (
           >
             Generate Password
           </Button>
-          <div>
-            <h2>Password</h2>
-            <div>{data.password}</div>
-          </div>
         </div>
       </div>
     </div>

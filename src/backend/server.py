@@ -71,8 +71,8 @@ async def health():
 async def button_clicked():
     return {"message": "Button clicked!"}
 
-@app.get("/api/v1/password/generate/{password_length}/{char_inc}")
-async def generate_password(password_length: int, char_inc: bool):
+@app.get("/api/v1/password/generate/{password_length}/{char_inc}/{nameValue}")
+async def generate_password(password_length: int, char_inc: bool, nameValue: str):
     password = gen_pass(password_length, char_inc)
-    return {"password": password}
+    return {"name": nameValue, "password": password}
 

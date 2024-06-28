@@ -2,7 +2,8 @@
 // Jacob Lowe
 
 import React, { useState } from "react";
-import { InputNumber, Button, Switch } from "antd";
+import { Input, InputNumber, Button, Switch } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { API, ENDPOINTS } from "./Api.ts";
 
 interface GeneratePasswordProps {
@@ -30,6 +31,7 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = (
 ) => {
   const [data, setData] = useState<Data>(defaultData); // Data from the server
   const [value, setValue] = useState<string | number | null>("16"); // Default value for the input number
+  const [nameValue, setNameValue] = useState<string>("");
   const [charToggle, setCharToggle] = useState<boolean>(false); // Default value for the toggle button
   const onCharToggleClick = (checked: boolean) => {
     setCharToggle(checked); // Set the toggle button to the opposite of what it currently is
@@ -42,7 +44,9 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = (
       const result = await API.fetch(ENDPOINTS.GENERATE_PASSWORD, {
         passwordLength,
         charToggle,
+        // TODO: Name here!
       });
+      alert(result);
       setData(result);
     } catch (error) {
       console.error(`Failed to fetch data`, error);
@@ -53,6 +57,18 @@ const GeneratePassword: React.FC<GeneratePasswordProps> = (
     <div>
       <h1>Generate Password</h1>
       <div>
+        <div> Website Name </div>
+        <div>
+          <>
+            <Input
+              size="large"
+              placeholder="Google"
+              prefix={<SearchOutlined />}
+              value={nameValue}
+              onChange={(event) => setNameValue(event.target.value)}
+            />
+          </>
+        </div>
         <div> Password Length</div>
         <InputNumber
           min={1}

@@ -53,9 +53,13 @@ def gen_pass(password_length, char_inc):
     if char_inc:
         charset += symbolset
     print("Generating password...!")
+    print("Something here")
     print("Password length: ", password_length)
     random.seed(time.time())
     password = ''.join(random.choice(charset) for _ in range(password_length))
+
+    print(f"Password with time: {password}")
+
     return password
 
 # REST API for generating password

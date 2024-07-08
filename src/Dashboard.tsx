@@ -1,6 +1,6 @@
 // Dashboard.tsx
 // Jacob Lowe
-import React, { useState } from "react";
+import React from "react";
 import { API, ENDPOINTS } from "./Api.ts";
 import { Button, Timeline } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
@@ -12,9 +12,6 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ items }) => {
-  // ...
-  const [data, setData] = useState<any>(null); // Data from the server
-
   function randomNumRange(min: number, max: number): number {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }

@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { Data } from "./GeneratePassword.tsx";
 import { Avatar, Button, ConfigProvider, theme, List } from "antd";
+import { API, ENDPOINTS } from "./Api.ts";
 import { CopyOutlined, DeleteOutlined } from "@ant-design/icons";
 
 interface VaultProps {
@@ -46,7 +47,38 @@ const Vault: React.FC<VaultProps> = () => {
   useEffect(() => {
     // Load from accessible list when component mounts
     setPasswordList([...passwordListAccessible]);
+    handleClickFetchDB(); // First time fetch
   }, []);
+
+  const handleClickFetchDB = async (): Promise<void> => {
+    try {
+      const result = await API.fetch(ENDPOINTS.ALL_PASSWORDS, {});
+      console.log(result);
+      result.forEach((data) => {
+        //const date = data[1]; // TODO: Date for future use in sorting on page
+        const name: string = data[2];
+        const password: string = data[3];
+        const valid = addPassword({ name, password });
+        if (valid) {
+          console.log(`Added ${name}`);
+          setPasswordList((prevList) => {
+            const index = prevList.findIndex((entry) => entry.name === name);
+            if (index !== -1) {
+              // Update existing entry
+              const newList = [...prevList];
+              newList[index].password = password;
+              return newList;
+            } else {
+              // Add new entry
+              return [...prevList, { name, password }];
+            }
+          });
+        }
+      });
+    } catch (error) {
+      console.error(`Failed to fetch data`, error);
+    }
+  };
 
   function removePassword(name: string): boolean {
     // Validation check
@@ -131,6 +163,14 @@ const Vault: React.FC<VaultProps> = () => {
               </List.Item>
             )}
           />
+          <Button
+            type="primary"
+            onClick={() => {
+              handleClickFetchDB();
+            }}
+          >
+            Fetch Data
+          </Button>
         </div>
       </div>
     </ConfigProvider>

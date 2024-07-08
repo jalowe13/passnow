@@ -106,7 +106,7 @@ if cur == False:
 
 # Checks if data exists in the database
 # Bool return for existance 
-def check_data(name):
+def check_data(name:str):
     try:
         check_query = "SELECT * FROM passwords WHERE name = %s"
         cur.execute(check_query, (name,))
@@ -121,8 +121,22 @@ def check_data(name):
         print(f"An error occurred: {e}")
         return False
 
+def all_data():
+    try:
+        check_query = "SELECT * FROM passwords"
+        cur.execute(check_query)
+        result = cur.fetchall()
+        if not result: # Handles empty result
+            logger.info("No data")
+            return {"message": f"No data", "status": "success"}
+        else:
+            logger.info("Data Exists")
+            return result
+    except Exception as e:
+            print(f"An error occurred: {e}")
+
 # Insert Data
-def insert_data(time, name, password):
+def insert_data(time:datetime, name:str, password:str):
     combined_time = f"{time[0]} {time[1]}"  
     datetime_object = datetime.strptime(combined_time, "%Y-%m-%d %H:%M:%S.%f")
     if not check_data(name):
@@ -168,24 +182,34 @@ def gen_pass(password_length, char_inc):
     print(f"Password: {password}")
     return password
 
+API_V = "/api/v1/"
+
 # REST API for generating password
-@app.get("/api/v1/health")
+@app.get(f"{API_V}health")
 async def health():
     return {"message": "Hello from the server!"}
 
-@app.get("/api/v1/button-clicked")
+@app.get(f"{API_V}button-clicked")
 async def button_clicked():
     return {"message": "Button clicked!"}
 
-@app.get("/api/v1/password/generate/{password_length}/{char_inc}/{nameValue}")
+@app.get(f"{API_V}password/generate/{{password_length}}/{{char_inc}}/{{nameValue}}")
 async def generate_password(password_length: int, char_inc: bool, nameValue: str):
+    nameValue = nameValue.upper() # Normalize
     password = gen_pass(password_length, char_inc)
     time = gen_time()
     insert_data(time,nameValue,password)
     return {"time": time, "name": nameValue, "password": password}
 
-@app.get("/api/v1/password/{nameValue}/delete")
+@app.get(f"{API_V}password/all")
+async def all_passwords():
+    return all_data()
+
+@app.get(f"{API_V}password/{{nameValue}}/delete")
 async def delete_password(nameValue:str):
+    nameValue = nameValue.upper()
     return delete_data(nameValue)
+
+
 
 

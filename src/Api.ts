@@ -9,6 +9,7 @@ export const ENDPOINTS = {
     GENERATE_PASSWORD: `${end}password/generate`,
     SAVE: `${end}save`,
     BUTTON_CLICKED: `${end}button-clicked`,
+    ALL_PASSWORDS: `${end}password/all`
 }
 
 export const API = {

@@ -65,6 +65,10 @@ const GeneratePassword: React.FC = () => {
     }
   };
 
+  function handleClickFetchDB() {
+    throw new Error("Function not implemented.");
+  }
+
   return (
     <div>
       <>{contextHolder}</>

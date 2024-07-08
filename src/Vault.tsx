@@ -80,6 +80,19 @@ const Vault: React.FC<VaultProps> = () => {
     }
   };
 
+  const handleClickDeleteDB = async (name: string): Promise<void> => {
+    console.log("Handle click");
+    try {
+      const result = await API.fetch(ENDPOINTS.DELETE_PASSWORD, {
+        method: "DELETE",
+        body: {
+          nameValue: name,
+        },
+      });
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    }
+  };
   function removePassword(name: string): boolean {
     // Validation check
     if (!name) {
@@ -92,6 +105,10 @@ const Vault: React.FC<VaultProps> = () => {
       const newPasswordList = passwordList.filter((_, index) => index !== idx);
       // Update the state with the new array
       setPasswordList(newPasswordList);
+
+      // Update in the database
+      console.log("NAME:" + name);
+      handleClickDeleteDB(name);
 
       // Update the accessible list
       passwordListAccessible = [...newPasswordList];

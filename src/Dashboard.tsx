@@ -17,7 +17,7 @@ const Dashboard: React.FC<DashboardProps> = ({ items }) => {
   }
   const handleButtonClick = (endpoint: string, data?: any): void => {
     console.log("Call the API with the endpoint: ", endpoint);
-    API.fetch(endpoint);
+    API.fetch(endpoint, data);
   };
 
   /*

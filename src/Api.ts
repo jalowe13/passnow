@@ -9,20 +9,32 @@ export const ENDPOINTS = {
     GENERATE_PASSWORD: `${end}password/generate`,
     SAVE: `${end}save`,
     BUTTON_CLICKED: `${end}button-clicked`,
-    ALL_PASSWORDS: `${end}password/all`
+    ALL_PASSWORDS: `${end}password/all`,
+    DELETE_PASSWORD: `${end}password/`
 }
 
 export const API = {
-    async fetch(endpoint: string, options= {}){
+    async fetch(endpoint: string, options: {
+      method?: string;
+      params?: Record<string,string>
+      body?: any
+    }={}){
         if (endpoint === null || endpoint === "") {
             throw new Error("Endpoint is null or empty for fetchAPI");
           }
-        console.log("FETCHING ENDPOINT:", endpoint, "WITH OPTIONS:", options);
-        const optionsPath = Object.values(options).reduce((path, value) => `${path}/${value}`, "");
-        const fullEndpoint = `${endpoint}${optionsPath}`; // Append options path to endpoint\
-        console.log("FETCHING FULL:", `${fullEndpoint}`);
+        console.log("FETCHING FULL:", `${endpoint}`);
           try {
-            const response = await fetch(`${fullEndpoint}`);
+            const response = await fetch(endpoint, {
+              method: options.method || 'GET',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: options.body ? JSON.stringify(options.body) : undefined,
+          });
+
+          if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+          }
             if (!response.ok) {
               throw new Error(`HTTP error! status: ${response.status}`);
             }

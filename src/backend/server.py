@@ -4,7 +4,7 @@ import logging
 import psycopg2
 from datetime import datetime
 from pydantic import BaseModel
-from fastapi import FastAPI, Response, HTTPException
+from fastapi import FastAPI, Response, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import random, string, time
@@ -182,6 +182,14 @@ def gen_pass(password_length, char_inc):
     print(f"Password: {password}")
     return password
 
+# Models
+class PasswordGenerateRequest(BaseModel):
+    password_length: int
+    char_inc: bool
+    nameValue: str
+class DeletePasswordRequest(BaseModel):
+    nameValue: str
+
 API_V = "/api/v1/"
 
 # REST API for generating password
@@ -193,22 +201,21 @@ async def health():
 async def button_clicked():
     return {"message": "Button clicked!"}
 
-@app.get(f"{API_V}password/generate/{{password_length}}/{{char_inc}}/{{nameValue}}")
-async def generate_password(password_length: int, char_inc: bool, nameValue: str):
-    nameValue = nameValue.upper() # Normalize
-    password = gen_pass(password_length, char_inc)
+@app.post(f"{API_V}password/generate")
+async def generate_password(request: PasswordGenerateRequest = Body(...)):
+    nameValue = request.nameValue.upper() # Normalize
+    password = gen_pass(request.password_length, request.char_inc)
     time = gen_time()
-    insert_data(time,nameValue,password)
+    insert_data(time, nameValue, password)
     return {"time": time, "name": nameValue, "password": password}
 
 @app.get(f"{API_V}password/all")
 async def all_passwords():
     return all_data()
 
-@app.get(f"{API_V}password/{{nameValue}}/delete")
-async def delete_password(nameValue:str):
-    nameValue = nameValue.upper()
-    return delete_data(nameValue)
+@app.delete(f"{API_V}password/")
+async def delete_password(request: DeletePasswordRequest):
+    return delete_data(request.nameValue.upper())
 
 
 

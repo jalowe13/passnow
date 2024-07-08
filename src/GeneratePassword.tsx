@@ -50,9 +50,12 @@ const GeneratePassword: React.FC = () => {
       typeof value === "string" ? parseInt(value, 10) : value;
     try {
       const result = await API.fetch(ENDPOINTS.GENERATE_PASSWORD, {
-        passwordLength,
-        charToggle,
-        nameValue,
+        method: "POST",
+        body: {
+          password_length: passwordLength,
+          char_inc: charToggle,
+          nameValue: nameValue,
+        },
       });
       addPassword(result);
       openNotificationWithIcon("success");

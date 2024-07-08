@@ -137,6 +137,17 @@ def insert_data(time, name, password):
     else:
         logger.info("Already Exists")
 
+# Delete Data
+def delete_data(name):
+    logger.info("Delete data")
+    delete_query = "DELETE FROM passwords WHERE name = %s RETURNING *;"
+    cur.execute(delete_query, (name,))
+    deleted_rows = cur.fetchall()
+    db.commit()
+    if deleted_rows:
+        return {"message": f"Deleted {name}", "status": "success"}
+    else:
+        return {"message": f"No record found for {name}", "status": "failed"}
 # Generate Time
 def gen_time():
     print("Generating time:")
@@ -171,6 +182,10 @@ async def generate_password(password_length: int, char_inc: bool, nameValue: str
     password = gen_pass(password_length, char_inc)
     time = gen_time()
     insert_data(time,nameValue,password)
-    
     return {"time": time, "name": nameValue, "password": password}
+
+@app.get("/api/v1/password/{nameValue}/delete")
+async def delete_password(nameValue:str):
+    return delete_data(nameValue)
+
 

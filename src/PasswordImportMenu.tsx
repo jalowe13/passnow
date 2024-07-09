@@ -1,7 +1,7 @@
 // Code imported designed and modified from
 // https://ant.design/components/table#components-table-demo-dynamic-settings
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import type { GetProp, TableProps } from "antd";
 import { Table } from "antd";
 
@@ -40,12 +40,17 @@ interface DataType {
 
 interface PasswordImportMenuProps {
   file: File | null;
+  onDataSetGenerated?: (dataSet: DataType[]) => void;
 }
 
-const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({ file }) => {
+const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({
+  file,
+  onDataSetGenerated,
+}) => {
   const [loading, setLoading] = useState(true);
   const [size] = useState<SizeType>("small");
   const [parsedData, setParsedData] = useState<DataType[]>([]);
+  const [isDataReady, setIsDataReady] = useState(false);
 
   const [hasData] = useState(true);
   const [top] = useState<TablePaginationPosition>("none");
@@ -53,6 +58,7 @@ const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({ file }) => {
   const [ellipsis] = useState(false);
   const [yScroll] = useState(false);
   const [xScroll] = useState<string>();
+  const lastSelectedDataRef = useRef<DataType[]>([]);
   const [rowSelection, setRowSelection] = useState<TableRowSelection<DataType>>(
     {
       // Setting Row selection, initially all selected
@@ -65,7 +71,7 @@ const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({ file }) => {
       },
     }
   );
-
+  // Parsing file on load
   useEffect(() => {
     if (file) {
       const reader = new FileReader();
@@ -95,7 +101,7 @@ const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({ file }) => {
             selectedRowKeys: data.map((item) => item.key), // Use the keys of the parsed data
           });
           // Fade in time for loading
-          const timer = setTimeout(() => setLoading(false), 100);
+          const timer = setTimeout(() => setLoading(false), 50);
           return () => clearTimeout(timer); // Cleanup the timer
         }
       };
@@ -103,6 +109,30 @@ const PasswordImportMenu: React.FC<PasswordImportMenuProps> = ({ file }) => {
       reader.readAsText(file);
     }
   }, [file]); // Empty dependency array means this effect runs once on mount
+
+  // Callback on changed selected import data
+  useEffect(() => {
+    if (
+      !loading &&
+      parsedData.length > 0 &&
+      onDataSetGenerated &&
+      rowSelection &&
+      rowSelection.selectedRowKeys
+    ) {
+      //handleDataReady();
+      const selectedData = rowSelection.selectedRowKeys.map((key) => {
+        // Key is an index in the parsed data
+        return parsedData[Number(key) - 1]; // Adjusting key to index if necessary
+      });
+      if (
+        JSON.stringify(selectedData) !==
+        JSON.stringify(lastSelectedDataRef.current)
+      ) {
+        onDataSetGenerated(selectedData);
+        lastSelectedDataRef.current = selectedData; // Update the ref with the new selectedData
+      }
+    }
+  }, [loading, parsedData, onDataSetGenerated, rowSelection]);
 
   const scroll: { x?: number | string; y?: number | string } = {};
   if (yScroll) {

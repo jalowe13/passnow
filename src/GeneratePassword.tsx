@@ -22,6 +22,12 @@ export interface Data {
   password: string;
 }
 
+interface DataType {
+  key: number;
+  name: string;
+  password: string;
+}
+
 const GeneratePassword: React.FC = () => {
   const [value, setValue] = useState<string | number | null>("16"); // Default value for the input number
   const [nameValue, setNameValue] = useState<string>("");
@@ -31,6 +37,7 @@ const GeneratePassword: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState<DataType[]>([]);
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -55,6 +62,12 @@ const GeneratePassword: React.FC = () => {
     });
   };
 
+  const handleDataSetGenerated = (newDataset) => {
+    console.log("Dataset was changed!!!!!!!!!!!!!!!!!");
+    setData(newDataset);
+    console.log(newDataset);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files ? event.target.files[0] : null;
     setFile(file);
@@ -67,7 +80,18 @@ const GeneratePassword: React.FC = () => {
     setTimeout(() => {
       setLoading(false);
       setModalOpen(false);
-    }, 3000);
+      console.log("click");
+      data.forEach((item) => {
+        // TODO: Date if needed for later
+        const now = new Date();
+        const date = now.toISOString().split("T")[0];
+        const time = now.toTimeString().split(" ")[0];
+        addPassword({
+          name: item.name,
+          password: item.password,
+        });
+      });
+    }, 1000);
   };
   const onCharToggleClick = (checked: boolean) => {
     setCharToggle(checked); // Set the toggle button to the opposite of what it currently is
@@ -119,7 +143,10 @@ const GeneratePassword: React.FC = () => {
           </Button>,
         ]}
       >
-        <PasswordImportMenu file={file} />
+        <PasswordImportMenu
+          file={file}
+          onDataSetGenerated={handleDataSetGenerated}
+        />
       </Modal>
       <div>
         <h1>Generate Password</h1>

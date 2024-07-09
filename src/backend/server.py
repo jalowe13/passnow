@@ -201,6 +201,8 @@ async def health():
 async def button_clicked():
     return {"message": "Button clicked!"}
 
+# TODO: Import passwords for generation after doing Add password on the client
+#@app.post(f"{API_V}password/massadd")
 @app.post(f"{API_V}password/generate")
 async def generate_password(request: PasswordGenerateRequest = Body(...)):
     nameValue = request.nameValue.upper() # Normalize

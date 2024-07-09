@@ -1,11 +1,20 @@
 // Generate_Password.tsx
 // Jacob Lowe
 
-import React, { useState } from "react";
-import { Input, InputNumber, Button, Switch, notification } from "antd";
+import React, { useRef, useState } from "react";
+import {
+  Input,
+  InputNumber,
+  Button,
+  Switch,
+  FloatButton,
+  notification,
+  Modal,
+} from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { API, ENDPOINTS } from "./Api.ts";
 import { addPassword } from "./Vault.tsx";
+import PasswordImportMenu from "./PasswordImportMenu.tsx";
 
 // Returning data from the server
 export interface Data {
@@ -18,6 +27,10 @@ const GeneratePassword: React.FC = () => {
   const [nameValue, setNameValue] = useState<string>("");
   const [charToggle, setCharToggle] = useState<boolean>(false); // Default value for the toggle button
   const [api, contextHolder] = notification.useNotification();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   type NotificationType = "success" | "info" | "warning" | "error";
 
@@ -40,6 +53,21 @@ const GeneratePassword: React.FC = () => {
       message: message,
       description: description,
     });
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    setFile(file);
+    console.log("File uploading!");
+    setModalOpen(true);
+  };
+
+  const handleSubmitOk = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+      setModalOpen(false);
+    }, 3000);
   };
   const onCharToggleClick = (checked: boolean) => {
     setCharToggle(checked); // Set the toggle button to the opposite of what it currently is
@@ -68,13 +96,31 @@ const GeneratePassword: React.FC = () => {
     }
   };
 
-  function handleClickFetchDB() {
-    throw new Error("Function not implemented.");
-  }
-
   return (
     <div>
       <>{contextHolder}</>
+      <Modal
+        title="Please select the passwords you would like to import"
+        centered
+        open={modalOpen}
+        onOk={() => setModalOpen(false)}
+        onCancel={() => setModalOpen(false)}
+        footer={[
+          <Button key="back" onClick={() => setModalOpen(false)}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            loading={loading}
+            onClick={handleSubmitOk}
+          >
+            Submit
+          </Button>,
+        ]}
+      >
+        <PasswordImportMenu file={file} />
+      </Modal>
       <div>
         <h1>Generate Password</h1>
         <div> Website Name </div>
@@ -118,7 +164,18 @@ const GeneratePassword: React.FC = () => {
             }}
           >
             Generate Password
-          </Button>
+          </Button>{" "}
+          <FloatButton
+            tooltip={<div>Upload CSV</div>}
+            onClick={() => fileInputRef.current!.click()}
+          />
+          <input
+            type="file"
+            ref={fileInputRef}
+            style={{ display: "none" }}
+            onChange={handleFileChange}
+            accept=".csv"
+          />
         </div>
       </div>
     </div>

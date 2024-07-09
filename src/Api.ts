@@ -10,7 +10,9 @@ export const ENDPOINTS = {
     SAVE: `${end}save`,
     BUTTON_CLICKED: `${end}button-clicked`,
     ALL_PASSWORDS: `${end}password/all`,
-    DELETE_PASSWORD: `${end}password/`
+    DELETE_PASSWORD: `${end}password`,
+    IMPORT_PASSWORD: `${end}password/import`
+
 }
 
 export const API = {

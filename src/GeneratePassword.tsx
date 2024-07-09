@@ -75,22 +75,33 @@ const GeneratePassword: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleSubmitOk = () => {
-    setLoading(true);
+  const handleSubmitOk = async (): Promise<void> => {
+    try {
+      setLoading(true);
+      // TODO Add each password to the cache
+      // data.forEach((item) => {
+      //   // TODO: Date if needed for later
+      //   const now = new Date();
+      //   const date = now.toISOString().split("T")[0];
+      //   const time = now.toTimeString().split(" ")[0];
+      //   addPassword({
+      //     name: item.name,
+      //     password: item.password,
+      //   });
+      // });
+      const result = await API.fetch(ENDPOINTS.IMPORT_PASSWORD, {
+        method: "POST",
+        body: data,
+      });
+      console.log("Result is " + result);
+    } catch (error) {
+      console.error("Could not import: ", error);
+    }
+    // Process the result after the request
     setTimeout(() => {
       setLoading(false);
       setModalOpen(false);
       console.log("click");
-      data.forEach((item) => {
-        // TODO: Date if needed for later
-        const now = new Date();
-        const date = now.toISOString().split("T")[0];
-        const time = now.toTimeString().split(" ")[0];
-        addPassword({
-          name: item.name,
-          password: item.password,
-        });
-      });
     }, 1000);
   };
   const onCharToggleClick = (checked: boolean) => {

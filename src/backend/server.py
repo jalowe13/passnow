@@ -131,6 +131,8 @@ def all_data():
             return {"message": f"No data", "status": "success"}
         else:
             logger.info("Data Exists")
+            for e in result:
+                logger.info(e)
             return result
     except Exception as e:
             print(f"An error occurred: {e}")
@@ -182,6 +184,16 @@ def gen_pass(password_length, char_inc):
     print(f"Password: {password}")
     return password
 
+# Import passwords
+def import_passwords(request):
+    for e in request:
+        logger.info(e)
+        nameValue = e['name'].upper() # Normalize
+        password = e['password'].upper()
+        time = gen_time()
+        logger.info(f"[{time}] Inserting {nameValue} with {password}")
+        insert_data(time, nameValue, password)
+
 # Models
 class PasswordGenerateRequest(BaseModel):
     password_length: int
@@ -202,7 +214,10 @@ async def button_clicked():
     return {"message": "Button clicked!"}
 
 # TODO: Import passwords for generation after doing Add password on the client
-#@app.post(f"{API_V}password/massadd")
+@app.post(f"{API_V}password/import")
+async def import_password(request = Body(...)):
+    import_passwords(request)
+    return {"message": "Imported into database"}
 @app.post(f"{API_V}password/generate")
 async def generate_password(request: PasswordGenerateRequest = Body(...)):
     nameValue = request.nameValue.upper() # Normalize

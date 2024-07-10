@@ -25,3 +25,5 @@ yarn-error.log*
 /src/backend/pb_data
 src/backend/server.exe
 /src/backend/__pycache__
+/dist
+*.spec

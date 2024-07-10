@@ -11,14 +11,44 @@ let frontend, backend, dynamo, uvicorn;
 // PID of last node.js process instance when application starts
 let lastChildPid;
 
+let mainWindow, loadingScreen;
+
+function createLoadingScreen() {
+  if (loadingScreen) {
+    return;
+  }
+  loadingScreen = new BrowserWindow({
+    width: 400,
+    height: 300,
+    frame: false,
+    icon: path.join(__dirname, "lock.ico"),
+    transparent: true,
+    alwaysOnTop: true,
+    vibrancy: "under-window", // This enables the blur effect
+    visualEffectState: "active", // This is needed for macOS
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  const loadingPath = path.join(__dirname, "loading.html");
+  console.log("Loading screen path:", loadingPath);
+  loadingScreen.loadFile(loadingPath);
+  loadingScreen.center();
+  loadingScreen.on("closed", () => (loadingScreen = null));
+  loadingScreen.show();
+}
+
 function createWindow() {
   // Create the browser window and listen for screen size changes
   console.log("Creating window...");
   process.env.FORCE_COLOR = 1; // Force chalk colors
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const win = new BrowserWindow({
+  const mainWindow = new BrowserWindow({
     width: width,
     height: height,
+    icon: path.join(__dirname, "lock.ico"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -69,7 +99,7 @@ function createWindow() {
   // Adjust screen size per window size
   screen.on("display-metrics-changed", () => {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-    win.setSize(width, height);
+    mainWindow.setSize(width, height);
   });
 
   // Start URL for production
@@ -93,21 +123,24 @@ function createWindow() {
     // Load the React app
     console.log("Server ready!");
 
-    win.loadURL("http://localhost:3000");
+    mainWindow.loadURL("http://localhost:3000");
     // Show when the React app is ready
 
     // Disable Scrollbar
-    win.webContents.on("did-finish-load", () => {
-      win.webContents.insertCSS(`
+    mainWindow.webContents.on("did-finish-load", () => {
+      mainWindow.webContents.insertCSS(`
       body {
         overflow: hidden;
       }
     `);
     });
-    win.once("ready-to-show", () => {
-      win.setTitle("PassNow");
-      win.maximize();
-      win.show();
+    mainWindow.once("ready-to-show", () => {
+      if (loadingScreen) {
+        loadingScreen.close();
+      }
+      mainWindow.setTitle("PassNow");
+      mainWindow.maximize();
+      mainWindow.show();
       // Get the child processes of the frontend
       psTree(frontend.pid, (err, children) => {
         if (err) {
@@ -124,7 +157,10 @@ function createWindow() {
 
 // App Listener events
 
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createLoadingScreen();
+  createWindow();
+});
 
 app.on("before-quit", () => {
   console.log("App is quitting...");
@@ -149,6 +185,16 @@ app.on("window-all-closed", () => {
 
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
+    createLoadingScreen();
     createWindow();
+  } else if (mainWindow && !mainWindow.isVisible()) {
+    createLoadingScreen();
+    // Show the main window when it's ready
+    mainWindow.once("ready-to-show", () => {
+      if (loadingScreen) {
+        loadingScreen.close();
+      }
+      mainWindow.show();
+    });
   }
 });

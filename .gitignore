@@ -27,3 +27,4 @@ src/backend/server.exe
 /src/backend/__pycache__
 /dist
 *.spec
+*.ini

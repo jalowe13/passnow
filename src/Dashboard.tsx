@@ -6,7 +6,6 @@ import { Button, Timeline } from "antd";
 import { CopyOutlined } from "@ant-design/icons";
 
 //type MenuItem = Required<MenuProps>['items'][number];
-
 interface DashboardProps {
   items: { label: string }[];
 }

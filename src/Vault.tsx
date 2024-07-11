@@ -27,7 +27,7 @@ export function addPassword(data: Data): boolean {
   }
   // Index of the entry in the password entrys if it exists
   const idx = passwordListAccessible.findIndex(
-    (entry) => entry.name === data.name
+    (entry) => entry.name === data.name,
   );
   if (idx !== -1) {
     // Update
@@ -44,23 +44,49 @@ const Vault: React.FC<VaultProps> = () => {
   // state handled on removal whereas add does not because its not on the
   // same screen
   const [passwordList, setPasswordList] = useState<PasswordEntry[]>([]);
+  const [passwordListSlice, setPasswordListSlice] = useState<PasswordEntry[]>(
+    [],
+  );
+  const [currPage, setCurrPage] = useState<number>(0);
+  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
+
   useEffect(() => {
     // Load from accessible list when component mounts
+    if (passwordListAccessible.length === 0) {
+      // Fetch data if not already loaded
+      handleClickFetchDB();
+    }
+    const elementamt: number = 8;
+    const startIdx: number = currPage * elementamt;
+    const stopIdx: number = startIdx + 8;
+    setPasswordListSlice(passwordList.slice(startIdx, stopIdx));
     setPasswordList([...passwordListAccessible]);
-    handleClickFetchDB(); // First time fetch
-  }, []);
+  }, [passwordListAccessible, passwordList, passwordListSlice, pageLoaded]);
+
+  const handleClickNextPage = (): void => {
+    if (currPage + 1 >= Math.ceil(passwordList.length / 8)) {
+      return;
+    }
+    setCurrPage(currPage + 1);
+  };
+
+  const handleClickPrevPage = (): void => {
+    if (currPage - 1 < 0) {
+      return;
+    }
+    setCurrPage(currPage - 1);
+  };
 
   const handleClickFetchDB = async (): Promise<void> => {
     try {
       const result = await API.fetch(ENDPOINTS.ALL_PASSWORDS, {});
       console.log(result);
-      result.forEach((data) => {
+      result.forEach((data: PasswordEntry) => {
         //const date = data[1]; // TODO: Date for future use in sorting on page
         const name: string = data[2];
         const password: string = data[3];
         const valid = addPassword({ name, password });
         if (valid) {
-          console.log(`Added ${name}`);
           setPasswordList((prevList) => {
             const index = prevList.findIndex((entry) => entry.name === name);
             if (index !== -1) {
@@ -154,7 +180,7 @@ const Vault: React.FC<VaultProps> = () => {
             itemLayout="horizontal"
             bordered={true}
             size="large"
-            dataSource={passwordList}
+            dataSource={passwordListSlice}
             renderItem={(item, index) => (
               <List.Item>
                 <List.Item.Meta
@@ -188,6 +214,13 @@ const Vault: React.FC<VaultProps> = () => {
           >
             Fetch Data
           </Button>
+          <Button type="primary" onClick={handleClickNextPage}>
+            Next page
+          </Button>
+          <Button type="primary" onClick={handleClickPrevPage}>
+            Prev page
+          </Button>
+          <p>Page: {currPage + 1}</p>
         </div>
       </div>
     </ConfigProvider>

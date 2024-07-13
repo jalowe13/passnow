@@ -5,31 +5,35 @@ const path = require("path");
 const url = require("url");
 const waitOn = require("wait-on");
 const chalk = require("chalk");
+const log = require("electron-log");
 
-// Declare variables for the backend and frontend processes
+app.commandLine.appendSwitch("enable-features", "WaylandWindowDecorations");
+app.commandLine.appendSwitch("ozone-platform-hint", "auto");
+app.disableHardwareAcceleration();
+
+console.log = log.log;
+log.transports.file.level = "debug";
+
 let frontend, backend, dynamo, uvicorn;
-// PID of last node.js process instance when application starts
 let lastChildPid;
-
 let mainWindow, loadingScreen;
 
 function createLoadingScreen() {
-  if (loadingScreen) {
-    return;
-  }
   loadingScreen = new BrowserWindow({
     width: 400,
     height: 300,
     frame: false,
-    icon: path.join(__dirname, "lock.ico"),
+    icon: path.join(
+      __dirname,
+      process.platform === "win32" ? "lock.ico" : "lock.png",
+    ),
     transparent: true,
     alwaysOnTop: true,
-    vibrancy: "under-window", // This enables the blur effect
-    visualEffectState: "active", // This is needed for macOS
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     },
+    parent: mainWindow, // Set the parent to mainWindow
   });
 
   const loadingPath = path.join(__dirname, "loading.html");
@@ -40,51 +44,51 @@ function createLoadingScreen() {
   loadingScreen.show();
 }
 
-function createWindow() {
-  // Create the browser window and listen for screen size changes
-  console.log("Creating window...");
-  process.env.FORCE_COLOR = 1; // Force chalk colors
+function initializeApp() {
+  console.log("Initializing app...");
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: width,
     height: height,
-    icon: path.join(__dirname, "lock.ico"),
+    icon: path.join(
+      __dirname,
+      process.platform === "win32" ? "lock.ico" : "lock.png",
+    ),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      zoomFactor: 1.0, // Disable zooming
+      zoomFactor: 1.0,
     },
-    show: false, // Don't show the window initially
+    show: false,
   });
 
-  // Arguments for staring go server or not
+  createLoadingScreen();
 
   const args = process.argv.slice(2);
-
-  // Convert argument into boolean to start go service or not
   const startGo = args.includes("true");
 
   console.log(`Starting up`);
 
-  // Only start go backend if argument is true
-  const processToKill = "server.exe";
-
-  if (startGo) {
-    console.log(chalk.green("Starting go server"));
-    backend = spawn("npm", ["run", "start-go"], { shell: true });
-    backend.stdout.on("data", (data) => {
-      console.log(chalk.green(`[Backend]: ${data}`));
-    });
-  } else {
-    console.log(chalk.red("Not starting go server"));
-    console.log(
-      chalk.red("Please start go uvicorn manually with npm run start-uvicorn")
-    );
-    console.log(chalk.red("Starting dynamo"));
-    dynamo = spawn("npm", ["run", "start-dynamo"], { shell: true });
-    dynamo.stdout.on("data", (data) => {
-      console.log(chalk.green(`[DynamoGB]: ${data}`));
-    });
+  if (process.platform === "win32") {
+    if (startGo) {
+      console.log(chalk.green("Starting go server"));
+      backend = spawn("npm", ["run", "start-go"], { shell: true });
+      backend.stdout.on("data", (data) => {
+        console.log(chalk.green(`[Backend]: ${data}`));
+      });
+    } else {
+      console.log(chalk.red("Not starting go server"));
+      console.log(
+        chalk.red(
+          "Please start go uvicorn manually with npm run start-uvicorn",
+        ),
+      );
+      console.log(chalk.red("Starting dynamo"));
+      dynamo = spawn("npm", ["run", "start-dynamo"], { shell: true });
+      dynamo.stdout.on("data", (data) => {
+        console.log(chalk.green(`[DynamoDB]: ${data}`));
+      });
+    }
   }
 
   frontend = spawn("npm", ["run", "start"], { shell: true, env: process.env });
@@ -96,44 +100,32 @@ function createWindow() {
   });
 
   console.log("App started!");
-  // Adjust screen size per window size
+
   screen.on("display-metrics-changed", () => {
     const { width, height } = screen.getPrimaryDisplay().workAreaSize;
     mainWindow.setSize(width, height);
   });
 
-  // Start URL for production
-  const startUrl =
-    process.env.ELECTRON_START_URL ||
-    url.format({
-      pathname: path.join(__dirname, "/../build/index.html"),
-      protocol: "file:",
-      slashes: true,
-    });
-
   console.log("Starting the server...");
 
-  //load the index.html from a url wait for the server to be ready
   waitOn({ resources: ["http://localhost:3000"] }, (err) => {
     if (err) {
       console.error("Error waiting for the server:", err);
       return;
     }
 
-    // Load the React app
     console.log("Server ready!");
 
     mainWindow.loadURL("http://localhost:3000");
-    // Show when the React app is ready
 
-    // Disable Scrollbar
     mainWindow.webContents.on("did-finish-load", () => {
       mainWindow.webContents.insertCSS(`
-      body {
-        overflow: hidden;
-      }
-    `);
+        body {
+          overflow: hidden;
+        }
+      `);
     });
+
     mainWindow.once("ready-to-show", () => {
       if (loadingScreen) {
         loadingScreen.close();
@@ -141,42 +133,62 @@ function createWindow() {
       mainWindow.setTitle("PassNow");
       mainWindow.maximize();
       mainWindow.show();
-      // Get the child processes of the frontend
-      psTree(frontend.pid, (err, children) => {
-        if (err) {
-          console.error(`Failed to get child processes: ${err}`);
-        } else {
-          console.log("Child processes:", children);
-          lastChildPid = children[children.length - 1].PID;
-          console.log(`Last child PID: ${lastChildPid}`);
-        }
-      });
+      if (process.platform === "win32") {
+        psTree(frontend.pid, (err, children) => {
+          if (err) {
+            console.error(`Failed to get child processes: ${err}`);
+          } else {
+            console.log("Child processes:", children);
+            lastChildPid = children[children.length - 1].PID;
+            console.log(`Last child PID: ${lastChildPid}`);
+          }
+        });
+      }
+      console.log("Ready!");
     });
+  });
+
+  mainWindow.on("uncaughtException", (error) => {
+    log.error("Uncaught Exception:", error);
+  });
+
+  mainWindow.on("unhandledRejection", (error) => {
+    log.error("Unhandled Rejection:", error);
+  });
+
+  mainWindow.webContents.on("crashed", (event) => {
+    console.error("Renderer process crashed:", event);
+  });
+
+  mainWindow.on("unresponsive", () => {
+    console.error("Window became unresponsive");
   });
 }
 
-// App Listener events
-
-app.whenReady().then(() => {
-  createLoadingScreen();
-  createWindow();
-});
+app.whenReady().then(initializeApp);
 
 app.on("before-quit", () => {
   console.log("App is quitting...");
-  // Killing last child node process for port 3000
-  exec(`taskkill /PID ${lastChildPid} /T /F`, (err) => {
-    if (err) {
-      console.error(`Failed to kill process ${lastChildPid}: ${err}`);
-    } else {
-      console.log(`Successfully killed process ${lastChildPid}`);
-    }
-  });
+  if (process.platform === "win32") {
+    exec(`taskkill /PID ${lastChildPid} /T /F`, (err) => {
+      if (err) {
+        console.error(`Failed to kill process ${lastChildPid}: ${err}`);
+      } else {
+        console.log(`Successfully killed process ${lastChildPid}`);
+      }
+    });
+  } else {
+    exec(`kill -9 ${frontend.pid}`, (err) => {
+      if (err) {
+        console.error(`Failed to kill process ${frontend.pid}: ${err}`);
+      } else {
+        console.log(`Successfully killed process ${frontend.pid}`);
+      }
+    });
+  }
 });
 
 app.on("window-all-closed", () => {
-  // The port number you're interested in
-  // Get a list of child processes
   if (process.platform !== "darwin") {
     console.log("Quitting app");
     app.quit();
@@ -185,16 +197,14 @@ app.on("window-all-closed", () => {
 
 app.on("activate", () => {
   if (BrowserWindow.getAllWindows().length === 0) {
-    createLoadingScreen();
-    createWindow();
-  } else if (mainWindow && !mainWindow.isVisible()) {
-    createLoadingScreen();
-    // Show the main window when it's ready
-    mainWindow.once("ready-to-show", () => {
-      if (loadingScreen) {
-        loadingScreen.close();
-      }
-      mainWindow.show();
-    });
+    initializeApp();
   }
+});
+
+process.on("uncaughtException", (error) => {
+  log.error("Uncaught exception:", error);
+});
+
+process.on("unhandledRejection", (error) => {
+  log.error("Unhandled rejection:", error);
 });

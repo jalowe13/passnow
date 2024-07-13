@@ -3,7 +3,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Data } from "./GeneratePassword.tsx";
-import { Avatar, Button, ConfigProvider, theme, List } from "antd";
+import { Avatar, Button, ConfigProvider, Checkbox, theme, List } from "antd";
 import { API, ENDPOINTS } from "./Api.ts";
 import { CopyOutlined, DeleteOutlined } from "@ant-design/icons";
 
@@ -49,6 +49,7 @@ const Vault: React.FC<VaultProps> = () => {
   );
   const [currPage, setCurrPage] = useState<number>(0);
   const [pageLoaded, setPageLoaded] = useState<boolean>(false);
+  const [blurCheckbox, setBlurCheckbox] = useState<boolean>(true);
 
   useEffect(() => {
     // Load from accessible list when component mounts
@@ -174,7 +175,7 @@ const Vault: React.FC<VaultProps> = () => {
       }}
     >
       <div>
-        <h1> All Passwords</h1>
+        <h3> All Database Passwords</h3>
         <div>
           <List
             itemLayout="horizontal"
@@ -190,7 +191,13 @@ const Vault: React.FC<VaultProps> = () => {
                     />
                   }
                   title={item.name}
-                  description={item.password}
+                  description={
+                    blurCheckbox ? (
+                      <div className="blurred-text">{item.password}</div>
+                    ) : (
+                      <div>{item.password}</div>
+                    )
+                  }
                 />
                 <Button
                   type="primary"
@@ -206,21 +213,20 @@ const Vault: React.FC<VaultProps> = () => {
               </List.Item>
             )}
           />
-          <Button
-            type="primary"
-            onClick={() => {
-              handleClickFetchDB();
-            }}
-          >
-            Fetch Data
+          <Button type="primary" onClick={handleClickPrevPage}>
+            Prev page
           </Button>
           <Button type="primary" onClick={handleClickNextPage}>
             Next page
           </Button>
-          <Button type="primary" onClick={handleClickPrevPage}>
-            Prev page
-          </Button>
-          <p>Page: {currPage + 1}</p>
+          <div className="display-blurred-subtext">
+            Blurred Text:
+            <Checkbox
+              checked={blurCheckbox}
+              onChange={(e) => setBlurCheckbox(e.target.checked)}
+            ></Checkbox>
+            <p>Page: {currPage + 1}</p>
+          </div>
         </div>
       </div>
     </ConfigProvider>

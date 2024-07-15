@@ -8,6 +8,10 @@
 # testing
 /coverage
 
+# configs
+.venv/*
+pyrightconfig.json
+
 # production
 /build
 main.exe

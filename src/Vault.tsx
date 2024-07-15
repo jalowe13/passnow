@@ -48,7 +48,6 @@ const Vault: React.FC<VaultProps> = () => {
     [],
   );
   const [currPage, setCurrPage] = useState<number>(0);
-  const [pageLoaded, setPageLoaded] = useState<boolean>(false);
   const [blurCheckbox, setBlurCheckbox] = useState<boolean>(true);
 
   useEffect(() => {
@@ -62,7 +61,7 @@ const Vault: React.FC<VaultProps> = () => {
     const stopIdx: number = startIdx + 8;
     setPasswordListSlice(passwordList.slice(startIdx, stopIdx));
     setPasswordList([...passwordListAccessible]);
-  }, [passwordListAccessible, passwordList, passwordListSlice, pageLoaded]);
+  }, [currPage, passwordList, passwordListSlice]);
 
   const handleClickNextPage = (): void => {
     if (currPage + 1 >= Math.ceil(passwordList.length / 8)) {
@@ -116,6 +115,9 @@ const Vault: React.FC<VaultProps> = () => {
           nameValue: name,
         },
       });
+      if (result.ok) {
+        console.log("Deleted successfully");
+      }
     } catch (error) {
       console.error("Failed to delete:", error);
     }

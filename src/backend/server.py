@@ -2,13 +2,14 @@ import os
 import threading
 import logging
 import psycopg2
-from datetime import datetime
+from datetime import datetime, time, date
 from pydantic import BaseModel
 from fastapi import FastAPI, Response, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-import random, string, time
-
+import random, string
+import time as time_module
+from psycopg2.extensions import connection, cursor  # For PostgreSQL
 
 app = FastAPI()
 
@@ -63,20 +64,20 @@ logger.info("Started the server")
 CONNECTION = "postgresql://postgres:password@127.0.0.1:5432/postgres"
 TESTING = True
 # New database connection
-cur = False # Initial cursor
-def connect_to_db():
+def connect_to_db() -> connection:
     try:
         db = psycopg2.connect(CONNECTION)
         logger.info("Connected to the database")
         return db
     except psycopg2.Error as e:
-        logger.info("Unable to connect to the database")
-        logger.info(e.pgerror)
-        logger.info(e.diag.message_detail)
-        return None
+        logger.error("Unable to connect to the database")
+        logger.error(e.pgerror)
+        if hasattr(e.diag, 'message_detail'):
+            logger.error(e.diag.message_detail)
+        raise ConnectionRefusedError("Failed to connect to the database") from e
 logger.info("Connecting to the database")
-db = connect_to_db() # Database connection
-cur = db.cursor()
+db: connection = connect_to_db() # Database connection
+cur: cursor = db.cursor() # Cursor
 
  # Check if the 'passwords' table exists, and create it if it doesn't
 logger.info("Attempt to create table")
@@ -87,7 +88,10 @@ cur.execute("""
         AND    tablename  = 'passwords'
             );
         """)
-if not cur.fetchone()[0]:
+result = cur.fetchone()
+if result is None:
+    raise ValueError("Expected a result got none")
+if not result[0]:
     cur.execute("""
         CREATE TABLE passwords (
             id SERIAL PRIMARY KEY,
@@ -105,7 +109,7 @@ if cur == False:
     exit(-1)
 
 # Checks if data exists in the database
-# Bool return for existance 
+# Bool return for existance
 def check_data(name:str):
     try:
         check_query = "SELECT * FROM passwords WHERE name = %s"
@@ -138,8 +142,8 @@ def all_data():
             print(f"An error occurred: {e}")
 
 # Insert Data
-def insert_data(time:datetime, name:str, password:str):
-    combined_time = f"{time[0]} {time[1]}"  
+def insert_data(time:tuple[time,date], name:str, password:str):
+    combined_time = f"{time[0]} {time[1]}"
     datetime_object = datetime.strptime(combined_time, "%Y-%m-%d %H:%M:%S.%f")
     if not check_data(name):
         try:
@@ -165,11 +169,13 @@ def delete_data(name):
     else:
         return {"message": f"No record found for {name}", "status": "failed"}
 # Generate Time
-def gen_time():
+def gen_time()-> tuple[time,date]:
     print("Generating time:")
-    current_time = datetime.now().time()
-    current_date = datetime.now().date()
-    return current_date,current_time
+    current_time: time = datetime.now().time()
+    current_date: date = datetime.now().date()
+    comb: tuple[time,date] = (current_time,current_date)
+    return comb
+
 
 # Generate Password
 def gen_pass(password_length, char_inc):
@@ -190,9 +196,9 @@ def import_passwords(request):
         logger.info(e)
         nameValue = e['name'].upper() # Normalize
         password = e['password'].upper()
-        time = gen_time()
+        curr_time: tuple[time,date] = gen_time()
         logger.info(f"[{time}] Inserting {nameValue} with {password}")
-        insert_data(time, nameValue, password)
+        insert_data(curr_time, nameValue, password)
 
 # Models
 class PasswordGenerateRequest(BaseModel):
@@ -233,7 +239,3 @@ async def all_passwords():
 @app.delete(f"{API_V}password/")
 async def delete_password(request: DeletePasswordRequest):
     return delete_data(request.nameValue.upper())
-
-
-
-

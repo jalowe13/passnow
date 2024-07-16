@@ -143,7 +143,7 @@ def all_data():
 
 # Insert Data
 def insert_data(time:tuple[time,date], name:str, password:str):
-    combined_time = f"{time[0]} {time[1]}"
+    combined_time = f"{time[1]} {time[0]}"
     datetime_object = datetime.strptime(combined_time, "%Y-%m-%d %H:%M:%S.%f")
     if not check_data(name):
         try:

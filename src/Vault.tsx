@@ -1,7 +1,7 @@
 // Vault.tsx
 // Jacob Lowe
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Data } from "./GeneratePassword.tsx";
 import { Avatar, Button, ConfigProvider, Checkbox, theme, List } from "antd";
 import { API, ENDPOINTS } from "./Api.ts";
@@ -49,35 +49,21 @@ const Vault: React.FC<VaultProps> = () => {
   );
   const [currPage, setCurrPage] = useState<number>(0);
   const [blurCheckbox, setBlurCheckbox] = useState<boolean>(true);
-
-  useEffect(() => {
-    // Load from accessible list when component mounts
-    if (passwordListAccessible.length === 0) {
-      // Fetch data if not already loaded
-      handleClickFetchDB();
-    }
+  // Call to slice passwords
+  const slicePasswords = useCallback((page: number, list: any[]) => {
     const elementamt: number = 8;
-    const startIdx: number = currPage * elementamt;
+    const startIdx: number = page * elementamt;
     const stopIdx: number = startIdx + 8;
-    setPasswordListSlice(passwordList.slice(startIdx, stopIdx));
+    return list.slice(startIdx, stopIdx);
+  }, []);
+  // Memo called for slicing passwords
+  const memoizedSlicedPasswords = useMemo(() => {
+    const slicedPasswords = slicePasswords(currPage, passwordListAccessible);
+    setPasswordListSlice(slicedPasswords);
     setPasswordList([...passwordListAccessible]);
-  }, [currPage, passwordList, passwordListSlice]);
-
-  const handleClickNextPage = (): void => {
-    if (currPage + 1 >= Math.ceil(passwordList.length / 8)) {
-      return;
-    }
-    setCurrPage(currPage + 1);
-  };
-
-  const handleClickPrevPage = (): void => {
-    if (currPage - 1 < 0) {
-      return;
-    }
-    setCurrPage(currPage - 1);
-  };
-
-  const handleClickFetchDB = async (): Promise<void> => {
+    return slicedPasswords;
+  }, [currPage, slicePasswords]);
+  const handleClickFetchDB = useCallback(async (): Promise<void> => {
     try {
       const result = await API.fetch(ENDPOINTS.ALL_PASSWORDS, {});
       console.log(result);
@@ -96,14 +82,42 @@ const Vault: React.FC<VaultProps> = () => {
               return newList;
             } else {
               // Add new entry
+
               return [...prevList, { name, password }];
             }
           });
         }
       });
+      // Update the sliced passwords
+      setPasswordList((currentList) => {
+        const slicedPasswords = slicePasswords(currPage, currentList);
+        setPasswordListSlice(slicedPasswords);
+        return currentList;
+      });
     } catch (error) {
       console.error(`Failed to fetch data`, error);
     }
+  }, [currPage, slicePasswords]);
+  useEffect(() => {
+    // Load from accessible list when component mounts
+    if (passwordListAccessible.length === 0) {
+      // Fetch data if not already loaded
+      handleClickFetchDB();
+    }
+  }, [currPage, passwordList, passwordListSlice, handleClickFetchDB]);
+
+  const handleClickNextPage = (): void => {
+    if (currPage + 1 >= Math.ceil(passwordList.length / 8)) {
+      return;
+    }
+    setCurrPage(currPage + 1);
+  };
+
+  const handleClickPrevPage = (): void => {
+    if (currPage - 1 < 0) {
+      return;
+    }
+    setCurrPage(currPage - 1);
   };
 
   const handleClickDeleteDB = async (name: string): Promise<void> => {
@@ -158,7 +172,6 @@ const Vault: React.FC<VaultProps> = () => {
         console.error("Failed to copy: ", err);
       });
   };
-
   const DIM_WHITE: string = "#D9D9D9";
   return (
     <ConfigProvider

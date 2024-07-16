@@ -1,7 +1,7 @@
 // Vault.tsx
 // Jacob Lowe
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Data } from "./GeneratePassword.tsx";
 import { Avatar, Button, ConfigProvider, Checkbox, theme, List } from "antd";
 import { API, ENDPOINTS } from "./Api.ts";
@@ -44,79 +44,91 @@ const Vault: React.FC<VaultProps> = () => {
   // state handled on removal whereas add does not because its not on the
   // same screen
   const [passwordList, setPasswordList] = useState<PasswordEntry[]>([]);
-  const [passwordListSlice, setPasswordListSlice] = useState<PasswordEntry[]>(
-    [],
-  );
   const [currPage, setCurrPage] = useState<number>(0);
   const [blurCheckbox, setBlurCheckbox] = useState<boolean>(true);
-  // Call to slice passwords
-  const slicePasswords = useCallback((page: number, list: any[]) => {
-    const elementamt: number = 8;
-    const startIdx: number = page * elementamt;
-    const stopIdx: number = startIdx + 8;
-    return list.slice(startIdx, stopIdx);
-  }, []);
-  // Memo called for slicing passwords
-  const memoizedSlicedPasswords = useMemo(() => {
-    const slicedPasswords = slicePasswords(currPage, passwordListAccessible);
-    setPasswordListSlice(slicedPasswords);
-    setPasswordList([...passwordListAccessible]);
-    return slicedPasswords;
-  }, [currPage, slicePasswords]);
-  const handleClickFetchDB = useCallback(async (): Promise<void> => {
-    try {
-      const result = await API.fetch(ENDPOINTS.ALL_PASSWORDS, {});
-      console.log(result);
-      result.forEach((data: PasswordEntry) => {
-        //const date = data[1]; // TODO: Date for future use in sorting on page
-        const name: string = data[2];
-        const password: string = data[3];
-        const valid = addPassword({ name, password });
-        if (valid) {
-          setPasswordList((prevList) => {
-            const index = prevList.findIndex((entry) => entry.name === name);
-            if (index !== -1) {
-              // Update existing entry
-              const newList = [...prevList];
-              newList[index].password = password;
-              return newList;
-            } else {
-              // Add new entry
 
-              return [...prevList, { name, password }];
-            }
-          });
-        }
-      });
-      // Update the sliced passwords
-      setPasswordList((currentList) => {
-        const slicedPasswords = slicePasswords(currPage, currentList);
-        setPasswordListSlice(slicedPasswords);
-        return currentList;
-      });
-    } catch (error) {
-      console.error(`Failed to fetch data`, error);
-    }
-  }, [currPage, slicePasswords]);
+  const handleClickFetchDB = useCallback(
+    async (page: number): Promise<boolean> => {
+      try {
+        const elementamt: number = 8;
+        const idx_s: number = page * elementamt;
+        const idx_e: number = idx_s + 8;
+        const result = await API.fetch(ENDPOINTS.FETCH_SLICE, {
+          method: "POST",
+          body: {
+            start_idx: idx_s,
+            end_idx: idx_e,
+          },
+        });
+        console.log(result);
+        setPasswordList([]);
+        result.forEach((data: PasswordEntry) => {
+          //const date = data[1]; // TODO: Date for future use in sorting on page
+          const name: string = data[2];
+          const password: string = data[3];
+          const valid = addPassword({ name, password });
+          console.log("Name:" + name);
+          if (valid) {
+            setPasswordList((prevList) => {
+              const index = prevList.findIndex((entry) => entry.name === name);
+              if (index !== -1) {
+                // Update existing entry
+                const newList = [...prevList];
+                newList[index].password = password;
+                return newList;
+              } else {
+                // Add new entry
+                return [...prevList, { name, password }];
+              }
+            });
+          } else {
+            console.log("Not valid!");
+          }
+        });
+        return true;
+      } catch (error) {
+        console.error(`Failed to fetch data`, error);
+        console.log("Returning false");
+        return false;
+      }
+    },
+    [],
+  );
   useEffect(() => {
     // Load from accessible list when component mounts
-    if (passwordListAccessible.length === 0) {
+    if (passwordList.length === 0 && currPage === 0) {
       // Fetch data if not already loaded
-      handleClickFetchDB();
+      handleClickFetchDB(0);
     }
-  }, [currPage, passwordList, passwordListSlice, handleClickFetchDB]);
+  }, [currPage, passwordList, handleClickFetchDB]);
 
   const handleClickNextPage = (): void => {
-    if (currPage + 1 >= Math.ceil(passwordList.length / 8)) {
-      return;
-    }
-    setCurrPage(currPage + 1);
+    console.log(passwordList);
+    const nextPage = currPage + 1;
+    console.log("Fetch forward for " + nextPage);
+
+    handleClickFetchDB(nextPage)
+      .then((result) => {
+        if (result) {
+          console.log("Next Page");
+          setCurrPage(nextPage);
+        } else {
+          console.log("Current Page");
+          handleClickFetchDB(currPage);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching next page:", error);
+      });
   };
 
   const handleClickPrevPage = (): void => {
     if (currPage - 1 < 0) {
       return;
     }
+    const prevPage = currPage - 1;
+    console.log("Fetch back for " + prevPage);
+    handleClickFetchDB(prevPage);
     setCurrPage(currPage - 1);
   };
 
@@ -196,7 +208,7 @@ const Vault: React.FC<VaultProps> = () => {
             itemLayout="horizontal"
             bordered={true}
             size="large"
-            dataSource={passwordListSlice}
+            dataSource={passwordList}
             renderItem={(item, index) => (
               <List.Item>
                 <List.Item.Meta

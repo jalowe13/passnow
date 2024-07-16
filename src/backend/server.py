@@ -124,7 +124,7 @@ def check_data(name:str):
     except Exception as e:
         print(f"An error occurred: {e}")
         return False
-
+# Returns all data from passwords
 def all_data():
     try:
         check_query = "SELECT * FROM passwords"
@@ -140,6 +140,29 @@ def all_data():
             return result
     except Exception as e:
             print(f"An error occurred: {e}")
+
+# Slice Data
+def slice_data(start:int , end:int ):
+    if start < 0 or end < start:
+        return ValueError("Invalid start or end indexes")
+    try:
+        check_query = """
+        SELECT * FROM passwords
+        LIMIT %s OFFSET %s
+        """
+        cur.execute(check_query, (end-start, start))
+        result = cur.fetchall()
+        if not result: # Handles empty result
+            logger.info("No data")
+            return {"message": f"No data", "status": "success"}
+        else:
+            logger.info("Data Exists")
+            for e in result:
+                logger.info(e)
+            return result
+    except Exception as e:
+            print(f"An error occurred: {e}")
+
 
 # Insert Data
 def insert_data(time:tuple[time,date], name:str, password:str):
@@ -208,6 +231,10 @@ class PasswordGenerateRequest(BaseModel):
 class DeletePasswordRequest(BaseModel):
     nameValue: str
 
+class PasswordSliceRequest(BaseModel):
+    start_idx: int
+    end_idx: int
+
 API_V = "/api/v1/"
 
 # REST API for generating password
@@ -235,6 +262,12 @@ async def generate_password(request: PasswordGenerateRequest = Body(...)):
 @app.get(f"{API_V}password/all")
 async def all_passwords():
     return all_data()
+
+@app.post(f"{API_V}password/")
+async def slice_passwords(request: PasswordSliceRequest = Body(...)):
+    start = request.start_idx
+    end = request.end_idx
+    return slice_data(start,end)
 
 @app.delete(f"{API_V}password/")
 async def delete_password(request: DeletePasswordRequest):

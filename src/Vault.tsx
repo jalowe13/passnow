@@ -3,9 +3,19 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Data } from "./GeneratePassword.tsx";
-import { Avatar, Button, ConfigProvider, Checkbox, theme, List } from "antd";
+import {
+  Avatar,
+  Input,
+  Button,
+  ConfigProvider,
+  Checkbox,
+  theme,
+  List,
+} from "antd";
 import { API, ENDPOINTS } from "./Api.ts";
 import { CopyOutlined, DeleteOutlined } from "@ant-design/icons";
+
+const { Search } = Input;
 
 interface VaultProps {
   items: { label: string }[];
@@ -46,6 +56,16 @@ const Vault: React.FC<VaultProps> = () => {
   const [passwordList, setPasswordList] = useState<PasswordEntry[]>([]);
   const [currPage, setCurrPage] = useState<number>(0);
   const [blurCheckbox, setBlurCheckbox] = useState<boolean>(true);
+  const [searching, setSearching] = useState<boolean>(false);
+  const [searchValue, setSearchValue] = useState<string>("");
+
+  // Auto Complete options in the future
+  // const options = passwordList.map((entry) => ({
+  //   value: entry.name,
+  // }));
+
+  // Handlers
+  // Handle and fetch passwords
 
   const handleClickFetchDB = useCallback(
     async (page: number): Promise<boolean> => {
@@ -61,30 +81,7 @@ const Vault: React.FC<VaultProps> = () => {
           },
         });
         console.log(result);
-        setPasswordList([]);
-        result.forEach((data: PasswordEntry) => {
-          //const date = data[1]; // TODO: Date for future use in sorting on page
-          const name: string = data[2];
-          const password: string = data[3];
-          const valid = addPassword({ name, password });
-          console.log("Name:" + name);
-          if (valid) {
-            setPasswordList((prevList) => {
-              const index = prevList.findIndex((entry) => entry.name === name);
-              if (index !== -1) {
-                // Update existing entry
-                const newList = [...prevList];
-                newList[index].password = password;
-                return newList;
-              } else {
-                // Add new entry
-                return [...prevList, { name, password }];
-              }
-            });
-          } else {
-            console.log("Not valid!");
-          }
-        });
+        setNewresults(result);
         return true;
       } catch (error) {
         console.error(`Failed to fetch data`, error);
@@ -101,6 +98,68 @@ const Vault: React.FC<VaultProps> = () => {
       handleClickFetchDB(0);
     }
   }, [currPage, passwordList, handleClickFetchDB]);
+
+  const setNewresults = (new_data: any): void => {
+    setPasswordList([]);
+    new_data.forEach((data: PasswordEntry) => {
+      //const date = data[1]; // TODO: Date for future use in sorting on page
+      const name: string = data[2];
+      const password: string = data[3];
+      const valid = addPassword({ name, password });
+      console.log("Name:" + name);
+      if (valid) {
+        setPasswordList((prevList) => {
+          const index = prevList.findIndex((entry) => entry.name === name);
+          if (index !== -1) {
+            // Update existing entry
+            const newList = [...prevList];
+            newList[index].password = password;
+            return newList;
+          } else {
+            // Add new entry
+            return [...prevList, { name, password }];
+          }
+        });
+      } else {
+        console.log("Not valid!");
+      }
+    });
+  };
+
+  const handleClickSearch = (value: string): void => {
+    if (searching) {
+      setSearching(false);
+    } else {
+      handleClickFetchSearchDB(value);
+    }
+  };
+
+  const handleClickFetchSearchDB = useCallback(
+    async (input_keyword: string): Promise<boolean> => {
+      if (input_keyword.length === 0) {
+        handleClickFetchDB(currPage);
+        return true;
+      }
+      input_keyword = input_keyword.toUpperCase();
+      try {
+        console.log("Calling for keyword: " + input_keyword);
+        // TODO: Create the fetch request
+        const result = await API.fetch(ENDPOINTS.FETCH_CONTAINS_KEYWORD, {
+          method: "POST",
+          body: {
+            keyword: input_keyword,
+          },
+        });
+        console.log(result);
+        setNewresults(result);
+        return true;
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+        return false;
+      }
+    },
+    [currPage, handleClickFetchDB],
+  );
 
   const handleClickNextPage = (): void => {
     console.log(passwordList);
@@ -203,6 +262,25 @@ const Vault: React.FC<VaultProps> = () => {
     >
       <div>
         <h3> All Database Passwords</h3>
+        <div style={{ justifyContent: "space-between" }}>
+          Search
+          <Search
+            placeholder="website"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onSearch={(value) => handleClickSearch(value)}
+            loading={searching}
+          />
+          {/* <AutoComplete
+            style={{ width: 800, justifyContent: "space-between" }}
+            options={options}
+            filterOption={(inputValue, option) =>
+              option!.value.toUpperCase().indexOf(inputValue.toUpperCase()) !==
+              -1
+            }
+          /> */}
+        </div>
+
         <div>
           <List
             itemLayout="horizontal"

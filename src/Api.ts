@@ -13,6 +13,7 @@ export const ENDPOINTS = {
   DELETE_PASSWORD: `${end}password`,
   IMPORT_PASSWORD: `${end}password/import`,
   FETCH_SLICE: `${end}password`,
+  FETCH_CONTAINS_KEYWORD: `${end}password/keyword`,
 };
 
 export const API = {

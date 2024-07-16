@@ -163,6 +163,31 @@ def slice_data(start:int , end:int ):
     except Exception as e:
             print(f"An error occurred: {e}")
 
+# Slice Data Keyword
+def slice_data_keyword(keyword:str):
+    logger.info("Search for Keyword:" + keyword)
+    if len(keyword) == 0:
+        return ValueError("String is empty")
+    try:
+        check_query = """
+        SELECT * FROM passwords
+        where name LIKE %s
+        """
+        search_pattern = f"%{keyword}%"
+        cur.execute(check_query, (search_pattern,))
+        result = cur.fetchall()
+        if not result: # Handles empty result
+            logger.info("No data")
+            return {"message": f"No data", "status": "success"}
+        else:
+            logger.info("Data Exists")
+            for e in result:
+                logger.info(e)
+            return result
+    except Exception as e:
+            print(f"An error occurred: {e}")
+    return 0;
+
 
 # Insert Data
 def insert_data(time:tuple[time,date], name:str, password:str):
@@ -224,6 +249,8 @@ def import_passwords(request):
         insert_data(curr_time, nameValue, password)
 
 # Models
+class PasswordSliceKeyword(BaseModel):
+    keyword: str
 class PasswordGenerateRequest(BaseModel):
     password_length: int
     char_inc: bool
@@ -272,3 +299,8 @@ async def slice_passwords(request: PasswordSliceRequest = Body(...)):
 @app.delete(f"{API_V}password/")
 async def delete_password(request: DeletePasswordRequest):
     return delete_data(request.nameValue.upper())
+
+@app.post(f"{API_V}password/keyword")
+async def fetch_keyword_password(request: PasswordSliceKeyword):
+    keyword = request.keyword
+    return slice_data_keyword(keyword);

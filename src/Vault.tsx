@@ -66,23 +66,43 @@ const Vault: React.FC<VaultProps> = () => {
 
   // Handlers
   // Handle and fetch passwords
-
   const handleClickFetchDB = useCallback(
-    async (page: number): Promise<boolean> => {
+    async (page?: number, all?: boolean): Promise<boolean> => {
       try {
-        const elementamt: number = 8;
-        const idx_s: number = page * elementamt;
-        const idx_e: number = idx_s + 8;
-        const result = await API.fetch(ENDPOINTS.FETCH_SLICE, {
-          method: "POST",
-          body: {
-            start_idx: idx_s,
-            end_idx: idx_e,
-          },
-        });
-        console.log(result);
-        setNewresults(result);
-        return true;
+        console.log("Page: " + page + " All: " + all);
+        if (page !== 0 && page !== undefined) {
+          console.log("Page is defined");
+          // Page is defined
+          const elementamt: number = 8;
+          const idx_s: number = page * elementamt;
+          const idx_e: number = idx_s + 8;
+          const result = await API.fetch(ENDPOINTS.FETCH_SLICE, {
+            method: "POST",
+            body: {
+              start_idx: idx_s,
+              end_idx: idx_e,
+            },
+          });
+          console.log(result);
+          setNewresults(result);
+          return true;
+        }
+        if (all) {
+          // Grab all passwords
+          const result = await API.fetch(ENDPOINTS.ALL_PASSWORDS, {
+            method: "GET",
+          });
+          console.log("Got result for all passwords:");
+          console.log(result);
+          for (let i = 0; i < result.length; i++) {
+            const name: string = result[i][2];
+            const password: string = result[i][3];
+            // TODO Export this to a CSV
+            console.log("Name: " + name + " Password: " + password);
+          }
+          return true;
+        }
+        return false;
       } catch (error) {
         console.error(`Failed to fetch data`, error);
         console.log("Returning false");
@@ -179,6 +199,11 @@ const Vault: React.FC<VaultProps> = () => {
       .catch((error) => {
         console.error("Error fetching next page:", error);
       });
+  };
+
+  const handleClickExportList = (): void => {
+    console.log("Get all passwords and export to CSV");
+    handleClickFetchDB(0, true);
   };
 
   const handleClickPrevPage = (): void => {
@@ -323,6 +348,9 @@ const Vault: React.FC<VaultProps> = () => {
           </Button>
           <Button type="primary" onClick={handleClickNextPage}>
             Next page
+          </Button>
+          <Button type="primary" onClick={handleClickExportList}>
+            Export List
           </Button>
           <div className="display-blurred-subtext">
             Blurred Text:

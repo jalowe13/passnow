@@ -32,3 +32,4 @@ src/backend/server.exe
 /dist
 *.spec
 *.ini
+*.csv

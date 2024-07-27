@@ -1,7 +1,9 @@
 import os
 import threading
 import logging
+import csv
 import psycopg2
+import pandas as pd
 from datetime import datetime, time, date
 from pydantic import BaseModel
 from fastapi import FastAPI, Response, HTTPException, Body
@@ -137,6 +139,13 @@ def all_data():
             logger.info("Data Exists")
             for e in result:
                 logger.info(e)
+                csv_file = "output.csv"
+                with open(csv_file, 'w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["Name", "Code"])
+                    for row in result:
+                        id, timestamp, name, code = row
+                        writer.writerow([name, code])
             return result
     except Exception as e:
             print(f"An error occurred: {e}")

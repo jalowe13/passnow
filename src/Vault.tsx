@@ -69,7 +69,7 @@ const Vault: React.FC<VaultProps> = () => {
   const handleClickFetchDB = useCallback(
     async (page?: number, all?: boolean): Promise<boolean> => {
       try {
-        if (page !== undefined) {
+        if (page !== undefined && !all) {
           console.log("Page is defined");
           // Page is defined
           const elementamt: number = 8;

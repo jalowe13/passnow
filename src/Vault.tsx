@@ -69,8 +69,7 @@ const Vault: React.FC<VaultProps> = () => {
   const handleClickFetchDB = useCallback(
     async (page?: number, all?: boolean): Promise<boolean> => {
       try {
-        console.log("Page: " + page + " All: " + all);
-        if (page !== 0 && page !== undefined) {
+        if (page !== undefined) {
           console.log("Page is defined");
           // Page is defined
           const elementamt: number = 8;
@@ -113,9 +112,11 @@ const Vault: React.FC<VaultProps> = () => {
   );
   useEffect(() => {
     // Load from accessible list when component mounts
+
     if (passwordList.length === 0 && currPage === 0) {
       // Fetch data if not already loaded
       handleClickFetchDB(0);
+      console.log("Fetching data");
     }
   }, [currPage, passwordList, handleClickFetchDB]);
 

@@ -252,7 +252,7 @@ def import_passwords(request):
     for e in request:
         logger.info(e)
         nameValue = e['name'].upper() # Normalize
-        password = e['password'].upper()
+        password = e['password']
         curr_time: tuple[time,date] = gen_time()
         logger.info(f"[{time}] Inserting {nameValue} with {password}")
         insert_data(curr_time, nameValue, password)

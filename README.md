@@ -11,13 +11,18 @@ Electron for Framework
 
 ### Alternate Backend with Install Notes
 
-FastAPI, (ASGI to serve ) DynamoDB, and Python
+FastAPI, (ASGI to serve ) Postgres, and Python
 
 ```bash
 # Setup
+# Containerize Python instance
+pip install virtualenv
+pip install psycopg2-binary
+pip install pandas
+virtualenv venv
+source venv/bin/activate
 pip install fastapi
 pip install uvicorn
-docker pull amazon/dynamodb-local
 
 # Running in GO
 npm run startappgo

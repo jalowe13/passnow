@@ -7,10 +7,10 @@ import GeneratePassword from "../GeneratePassword.tsx";
 const ContentView: React.FC = () => {
   const { view } = useView();
   const dashboard_items = [
-    { label: "Dice" },
-    { label: "Codewars" },
-    { label: "AMD" },
-    { label: "Paypal" },
+    // { label: "Dice" },
+    // { label: "Codewars" },
+    // { label: "AMD" },
+    // { label: "Paypal" },
   ];
   return (
     <div>

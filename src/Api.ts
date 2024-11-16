@@ -14,6 +14,7 @@ export const ENDPOINTS = {
   IMPORT_PASSWORD: `${end}password/import`,
   FETCH_SLICE: `${end}password`,
   FETCH_CONTAINS_KEYWORD: `${end}password/keyword`,
+  FETCH_PASSWORD_AMOUNT: `${end}password/amount`
 };
 
 export const API = {

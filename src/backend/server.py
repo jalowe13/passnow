@@ -150,6 +150,15 @@ def all_data():
     except Exception as e:
             print(f"An error occurred: {e}")
 
+def entries_length():
+    try:
+        count_query = "SELECT COUNT(*) FROM passwords"
+        cur.execute(count_query)
+        count_result = cur.fetchone()
+        entry_count = count_result[0] 
+        return entry_count
+    except Exception as e:
+        print(f"An error occured: {e}")
 # Slice Data
 def slice_data(start:int , end:int ):
     if start < 0 or end < start:
@@ -298,6 +307,16 @@ async def generate_password(request: PasswordGenerateRequest = Body(...)):
 @app.get(f"{API_V}password/all")
 async def all_passwords():
     return all_data()
+
+@app.get(f"{API_V}password/all")
+async def all_passwords():
+    return all_data()
+
+@app.get(f"{API_V}password/amount")
+async def entries_length_get():
+    length = entries_length()
+    print("Length", length)
+    return entries_length() 
 
 @app.post(f"{API_V}password/")
 async def slice_passwords(request: PasswordSliceRequest = Body(...)):

@@ -1,5 +1,5 @@
 import React from "react";
-import { HddFilled, KeyOutlined } from "@ant-design/icons";
+import { HomeFilled, HddFilled, KeyOutlined } from "@ant-design/icons";
 import { Menu, MenuProps } from "antd";
 import { useView, View } from "../App.tsx";
 
@@ -9,9 +9,9 @@ const MenuHeader: React.FC = () => {
   const handleClickMenu: MenuProps["onClick"] = (e) => {
     console.log(e.key);
     switch (e.key) {
-      //case "sub1":
-      //  setView(View.Dashboard);
-      //  break;
+      case "sub1":
+        setView(View.Dashboard);
+        break;
       case "sub2":
         setView(View.Vault);
         break;
@@ -24,11 +24,11 @@ const MenuHeader: React.FC = () => {
   type MenuItem = Required<MenuProps>["items"][number];
 
   const items: MenuItem[] = [
-    // {
-    //   key: "sub1",
-    //   label: "Dashboard",
-    //   icon: <HomeFilled />,
-    // },
+    {
+      key: "sub1",
+      label: "Dashboard",
+      icon: <HomeFilled />,
+    },
     {
       key: "sub2",
       label: "Vault",

@@ -34,11 +34,13 @@ docker ps -a # List running containers (so you can grab your container-id)
 # start and stop container
 docker start (dockerid)
 docker stop (dockerid)
-
+```
 
 # Install packages for the client and run
+```bash
 npm install
 npm install --save-dev electron
+```
 
 # Install packages for the server and run
 ```bash

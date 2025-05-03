@@ -27,12 +27,14 @@ docker run --name my-postgres-db \
   -v postgres-data:/var/lib/postgresql/data \
   -d \
   postgres
-
+```
 # To run later you can use the following commands
+```bash
 docker psa -a # List running containers (so you can grab your container-id)
 # start and stop container
 docker start (dockerid)
 docker stop (dockerid)
+```
 
 
 

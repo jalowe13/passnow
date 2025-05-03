@@ -30,41 +30,42 @@ docker run --name my-postgres-db \
 ```
 # To run later you can use the following commands
 ```bash
-docker psa -a # List running containers (so you can grab your container-id)
+docker ps -a # List running containers (so you can grab your container-id)
 # start and stop container
 docker start (dockerid)
 docker stop (dockerid)
+
+
+# Install packages for the client and run
+npm install
+npm install --save-dev electron
+
+# Install packages for the server and run
+```bash
+cd src/backend # Navigate to the backend server
+python3 -m venv venv # Create a virtualenv
+source venv/bin/activate # Activate the virtualenv
+pip install -r requirements.txt # Install all package requirements
+```
+# If some packages needed to be deleted
+```bash
+rm package-lock.json
+rm -rf node_modules
 ```
 
+# To Run
+```bash
+npm run start-uvicorn # For the server side
+npm run electron-start # For the client side
 
+```
 
 ### Alternate Backend with Install Notes
 FastAPI, (ASGI to serve ) Postgres, and Python
 
-```bash
-# Setup
-# Containerize Python instance
-pip install virtualenv
-pip install psycopg2-binary
-pip install pandas
-virtualenv venv
-source venv/bin/activate
-pip install fastapi
-pip install uvicorn
-
-# Running in GO
-npm run startappgo
-# Running in Python (Experimental)
-npm run startapp
-npm run start-uvicorn
-```
 
 ### Mobile Implementation
 
 React Native
 
-### Build and Run
 
-To run
-
-> npm run startappnode

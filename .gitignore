@@ -33,3 +33,9 @@ src/backend/server.exe
 *.spec
 *.ini
 *.csv
+
+# Packages
+package-lock.json
+
+# Pass
+/src/backend/password.txt

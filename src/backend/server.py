@@ -63,8 +63,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.info("Started the server")
 # Setting up the connection to the database
-CONNECTION = "postgresql://postgres:password@127.0.0.1:5432/postgres"
-TESTING = True
+CONNECTION = "postgresql://postgres:mysecretpassword@127.0.0.1:5432/postgres"
+TESTING = True 
 # New database connection
 def connect_to_db() -> connection:
     try:
